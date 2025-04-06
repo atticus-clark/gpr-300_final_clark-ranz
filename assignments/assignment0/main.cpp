@@ -14,6 +14,7 @@
 #include <ew/transform.h>
 #include <ew/cameraController.h>
 #include <ew/texture.h>
+#include <ew/procGen.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 GLFWwindow* initWindow(const char* title, int width, int height);
@@ -29,45 +30,30 @@ float deltaTime;
 ew::Camera camera;
 ew::CameraController cameraController;
 
-struct Material
+int main()
 {
-	float Ka = 1.0;
-	float Kd = 0.5;
-	float Ks = 0.5;
-	float Shininess = 128;
-}material;
-
-int main() {
-	GLFWwindow* window = initWindow("Assignment 0", screenWidth, screenHeight);
+	GLFWwindow* window = initWindow("Final Project", screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glEnable(GL_DEPTH_TEST);
+
+	// camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
-	// look at the center of the screen
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera.aspectRatio = (float)screenWidth / screenHeight;
-	// vertical field of view in degrees
 	camera.fov = 60.0f;
 
 	glm::vec3 lightPos(0.0, -1.0, 0.0);
 
-	glEnable(GL_CULL_FACE);
-	// back face culling
-	glCullFace(GL_BACK);
-	// depth testing
-	glEnable(GL_DEPTH_TEST);
+	// objects
+	ew::Mesh planeMesh(ew::createPlane(10.0f, 10.0f, 20));
+	ew::Transform planeTransform;
+	planeTransform.position = glm::vec3(0, -2.0, 0);
 
-	GLuint brickTexture = ew::loadTexture("assets/PavingStones.png");
-	GLuint normalMap = ew::loadTexture("assets/PavingStones_normal.png");
-
-	// bind brick texture to texture unit 0
-	glBindTextureUnit(0, brickTexture);
-	glBindTextureUnit(1, normalMap);
-
-	ew::Shader shader = ew::Shader("assets/lit.vert", "assets/lit.frag");
-
-	ew::Model monkeyModel = ew::Model("assets/suzanne.fbx");
-
-	ew::Transform monkeyTransform;
+	// shaders
+	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -77,34 +63,16 @@ int main() {
 		prevFrameTime = time;
 
 		//RENDER
-		glClearColor(0.6f,0.8f,0.92f,1.0f);
+		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		cameraController.move(window, &camera, deltaTime);
 
-		// make "_MainTex" sampler2D sample from 2D texture bound to unit 0
-		shader.use();
-		shader.setInt("_MainTex", 0);
-		shader.setMat4("_Model", glm::mat4(1.0f));
-		shader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		//shader.setVec3("_EyePos", camera.position);
-		shader.setInt("normalMap", 1);
-		shader.setVec3("viewPos", camera.position);
-		shader.setVec3("lightPos", lightPos);
-
-		shader.setFloat("_Material.Ka", material.Ka);
-		shader.setFloat("_Material.Kd", material.Kd);
-		shader.setFloat("_Material.Ks", material.Ks);
-		shader.setFloat("_Material.Shininess", material.Shininess);
-
-		// rotates model around Y axis
-		monkeyTransform.rotation = glm::rotate(monkeyTransform.rotation, deltaTime, glm::vec3(0.0, 1.0, 0.0));
-
-		// transform.modelMatrix() combines translation, rotation, and scale into a 4x4 model matrix
-		shader.setMat4("_Model", monkeyTransform.modelMatrix());
-
-		// draws monkey model using current shader
-		monkeyModel.draw();
+		// shader calls
+		waterShader.use();
+		waterShader.setMat4("_Model", planeTransform.modelMatrix());
+		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		planeMesh.draw();
 
 		drawUI();
 
@@ -126,13 +94,6 @@ void drawUI() {
 	ImGui::NewFrame();
 
 	ImGui::Begin("Settings");
-	if (ImGui::CollapsingHeader("Material"))
-	{
-		ImGui::SliderFloat("AmbientK", &material.Ka, 0.0f, 1.0f);
-		ImGui::SliderFloat("DiffuseK", &material.Kd, 0.0f, 1.0f);
-		ImGui::SliderFloat("SpecularK", &material.Ks, 0.0f, 1.0f);
-		ImGui::SliderFloat("Shininess", &material.Shininess, 2.0f, 1024.0f);
-	}
 	if (ImGui::Button("Reset Camera"))
 	{
 		resetCamera(&camera, &cameraController);
@@ -184,4 +145,3 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 
 	return window;
 }
-
