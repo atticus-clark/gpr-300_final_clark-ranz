@@ -22,8 +22,63 @@ int screenHeight = 720;
 float prevFrameTime;
 float deltaTime;
 
+// lower resolution due to expense
+const int REFLECTION_HEIGHT = 180;
+const int REFLECTION_WIDTH = 320;
+const int REFRACTION_HEIGHT = 720;
+const int REFRACTION_WIDTH = 1280;
+
 ew::Camera camera;
 ew::CameraController cameraController;
+
+// creates a color buffer texture for a framebuffer- mandatory
+GLuint createTexture(int height, int width)
+{
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	return texture;
+}
+
+// creates a depth buffer texture for a framebuffer- optional
+GLuint createDepthTexture(int height, int width)
+{
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+	return texture;
+}
+
+// creates a depth buffer attachment for non framebuffer objects
+GLuint createDepthBuffer(int height, int width)
+{
+	GLuint depthBuffer = GL_RENDERBUFFER;
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+	return depthBuffer;
+}
+
+void bindFramebuffer(GLuint framebuffer, int height, int width)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glViewport(0, 0, width, height);
+}
+
+void unbindFramebuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, screenWidth, screenHeight);
+}
 
 void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 {

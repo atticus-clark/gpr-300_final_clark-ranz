@@ -25,6 +25,23 @@ int main()
 	// shaders
 	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
 
+	// framebuffers
+	// refraction framebuffer
+	unsigned int refractionFramebuffer;
+	glGenFramebuffers(1, &refractionFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
+	GLuint refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	unbindFramebuffer();
+
+	// reflection framebuffer
+	unsigned int reflectionFramebuffer;
+	glGenFramebuffers(1, &reflectionFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
+	GLuint reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	GLuint reflectionDepthTex = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	unbindFramebuffer();
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
