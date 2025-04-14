@@ -20,7 +20,11 @@ int main()
 	// objects
 	ew::Mesh planeMesh(ew::createPlane(10.0f, 10.0f, 20));
 	ew::Transform planeTransform;
-	planeTransform.position = glm::vec3(0, -2.0, 0);
+	int planeHeight = -2;
+	planeTransform.position = glm::vec3(0, planeHeight, 0);
+
+	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -planeHeight);
+	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, planeHeight);
 
 	// shaders
 	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
@@ -55,10 +59,31 @@ int main()
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glEnable(GL_CLIP_DISTANCE0);
+
 		// shader calls
 		waterShader.use();
 		waterShader.setMat4("_Model", planeTransform.modelMatrix());
+		
+		// reflection
+		//camera.position.y -= (2 * (camera.position.y - planeHeight));
+		// TODO: invert camera pitch
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setVec4("_Plane", reflectionClipPlane);
+		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
+		planeMesh.draw();
+
+		//camera.position.y += (2 * (camera.position.y - planeHeight));
+		// TODO: return camera pitch
+
+		// refraction
+		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setVec4("_Plane", refractionClipPlane);
+		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
+		planeMesh.draw();
+
+		glDisable(GL_CLIP_DISTANCE0);
+		unbindFramebuffer();
 		planeMesh.draw();
 
 		drawUI();
