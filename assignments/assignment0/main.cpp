@@ -29,6 +29,16 @@ int main()
 	// shaders
 	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
 
+	// textures
+	GLuint dudvMap = ew::loadTexture("assets/waterDUDV.png");
+	glBindTextureUnit(2, dudvMap);
+
+	// shader calls
+	waterShader.use();
+	waterShader.setInt("reflectionTex", 0);
+	waterShader.setInt("refractionTex", 1);
+	waterShader.setInt("dudvMap", 2);
+
 	// framebuffers
 	// refraction framebuffer
 	unsigned int refractionFramebuffer;
