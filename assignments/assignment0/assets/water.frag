@@ -2,12 +2,15 @@
 
 in vec4 clipSpace;
 in vec2 TexCoords;
+in vec3 WorldNormal;
 
 out vec4 FragColor;
 
 uniform sampler2D reflectionTex;
 uniform sampler2D refractionTex;
 uniform sampler2D dudvMap;
+
+uniform vec3 _LightDirection = vec3(0.0, -1.0, 0.0);
 
 uniform float moveFactor;
 
@@ -35,5 +38,6 @@ void main()
 	vec4 refractColor = texture(refractionTex, refractTexCoords);
 
 	FragColor = mix(reflectColor, refractColor, 0.5);
+	// make it more blue
 	FragColor = mix(FragColor, vec4(0.0, 0.3, 0.5, 1.0), 0.2);
 }

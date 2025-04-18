@@ -31,6 +31,7 @@ int main()
 	unsigned int refractionFramebuffer;
 	glGenFramebuffers(1, &refractionFramebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	GLuint refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	unbindFramebuffer();
@@ -39,8 +40,9 @@ int main()
 	unsigned int reflectionFramebuffer;
 	glGenFramebuffers(1, &reflectionFramebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	GLuint reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
-	GLuint reflectionDepthTex = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	unbindFramebuffer();
 
 	// shaders
@@ -68,7 +70,7 @@ int main()
 		cameraController.move(window, &camera, deltaTime);
 		float distance = 2 * (camera.position.y - waterHeight);
 
-		moveFactor += WAVE_SPEED * deltaTime;
+		//moveFactor += WAVE_SPEED * deltaTime;
 		//moveFactor %= 1;
 
 		//RENDER
@@ -83,20 +85,20 @@ int main()
 		waterShader.setFloat("moveFactor", moveFactor);
 		
 		// reflection
+		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		camera.position.y -= distance;
 		cameraController.pitch = -cameraController.pitch;
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", reflectionClipPlane);
-		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		waterMesh.draw();
 
 		camera.position.y += distance;
 		cameraController.pitch = -cameraController.pitch;
 
 		// refraction
+		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", refractionClipPlane);
-		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		waterMesh.draw();
 
 		glDisable(GL_CLIP_DISTANCE0);
