@@ -25,11 +25,15 @@ float deltaTime;
 // lower resolution due to expense
 const int REFLECTION_HEIGHT = 180;
 const int REFLECTION_WIDTH = 320;
-const int REFRACTION_HEIGHT = 720;
-const int REFRACTION_WIDTH = 1280;
+const int REFRACTION_HEIGHT = 360;
+const int REFRACTION_WIDTH = 640;
+
+const float WAVE_SPEED = 0.03;
 
 ew::Camera camera;
 ew::CameraController cameraController;
+
+float moveFactor = 0;
 
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)

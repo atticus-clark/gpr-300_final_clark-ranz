@@ -18,26 +18,13 @@ int main()
 	glm::vec3 lightPos(0.0, -1.0, 0.0);
 
 	// objects
-	ew::Mesh planeMesh(ew::createPlane(10.0f, 10.0f, 20));
-	ew::Transform planeTransform;
-	int planeHeight = -2;
-	planeTransform.position = glm::vec3(0, planeHeight, 0);
+	ew::Mesh waterMesh(ew::createPlane(10.0f, 10.0f, 20));
+	ew::Transform waterTransform;
+	int waterHeight = -2;
+	waterTransform.position = glm::vec3(0, waterHeight, 0);
 
-	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -planeHeight);
-	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, planeHeight);
-
-	// shaders
-	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
-
-	// textures
-	GLuint dudvMap = ew::loadTexture("assets/waterDUDV.png");
-	glBindTextureUnit(2, dudvMap);
-
-	// shader calls
-	waterShader.use();
-	waterShader.setInt("reflectionTex", 0);
-	waterShader.setInt("refractionTex", 1);
-	waterShader.setInt("dudvMap", 2);
+	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -waterHeight);
+	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, waterHeight);
 
 	// framebuffers
 	// refraction framebuffer
@@ -56,6 +43,21 @@ int main()
 	GLuint reflectionDepthTex = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	unbindFramebuffer();
 
+	// shaders
+	ew::Shader waterShader = ew::Shader("assets/water.vert", "assets/water.frag");
+
+	// textures
+	glBindTextureUnit(0, reflectionTex);
+	glBindTextureUnit(1, refractionTex);
+	GLuint dudvMap = ew::loadTexture("assets/waterDUDV.png");
+	glBindTextureUnit(2, dudvMap);
+
+	// shader calls
+	waterShader.use();
+	waterShader.setInt("reflectionTex", 0);
+	waterShader.setInt("refractionTex", 1);
+	waterShader.setInt("dudvMap", 2);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
@@ -64,6 +66,10 @@ int main()
 		prevFrameTime = time;
 
 		cameraController.move(window, &camera, deltaTime);
+		float distance = 2 * (camera.position.y - waterHeight);
+
+		moveFactor += WAVE_SPEED * deltaTime;
+		//moveFactor %= 1;
 
 		//RENDER
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
@@ -73,28 +79,29 @@ int main()
 
 		// shader calls
 		waterShader.use();
-		waterShader.setMat4("_Model", planeTransform.modelMatrix());
+		waterShader.setMat4("_Model", waterTransform.modelMatrix());
+		waterShader.setFloat("moveFactor", moveFactor);
 		
 		// reflection
-		//camera.position.y -= (2 * (camera.position.y - planeHeight));
-		// TODO: invert camera pitch
+		camera.position.y -= distance;
+		cameraController.pitch = -cameraController.pitch;
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", reflectionClipPlane);
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
-		planeMesh.draw();
+		waterMesh.draw();
 
-		//camera.position.y += (2 * (camera.position.y - planeHeight));
-		// TODO: return camera pitch
+		camera.position.y += distance;
+		cameraController.pitch = -cameraController.pitch;
 
 		// refraction
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", refractionClipPlane);
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
-		planeMesh.draw();
+		waterMesh.draw();
 
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
-		planeMesh.draw();
+		waterMesh.draw();
 
 		drawUI();
 

@@ -15,7 +15,7 @@ const float tiling = 6.0;
 
 void main()
 {
-	clipSpace = _ViewProjection * _Model * vec4(vPos.x, 0.0, vPos.y, 1.0);
+	clipSpace = _ViewProjection * _Model * vec4(vPos, 1.0);
 
 	gl_ClipDistance[0] = -1;
 	gl_Position = clipSpace;
