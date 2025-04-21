@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <string>
 
 #include <ew/external/glad.h>
 
@@ -17,6 +18,8 @@
 #include <ew/cameraController.h>
 #include <ew/texture.h>
 #include <ew/procGen.h>
+
+#include "../finalProject/assets/program/outlines.h"
 
 // Global state
 int screenWidth = 1080;
@@ -36,6 +39,8 @@ ew::Camera camera;
 ew::CameraController cameraController;
 
 float moveFactor = 0;
+
+OutlinedObjs* pOutlined;
 
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)
@@ -93,17 +98,40 @@ void resetCamera(ew::Camera* camera, ew::CameraController* controller)
 	controller->yaw = controller->pitch = 0;
 }
 
-void drawUI() {
+void drawUI(float dt) {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("Settings");
-	if (ImGui::Button("Reset Camera"))
-	{
+	ImGui::Begin("Settings"); // begin window: Settings
+
+	//std::string fpsCounter = "FPS: " + std::to_string(1.0f / dt);
+	//ImGui::Text(fpsCounter.data());
+
+	if(ImGui::Button("Reset Camera")) {
 		resetCamera(&camera, &cameraController);
 	}
-	ImGui::End();
+
+	ImGui::Checkbox("Xray", &(pOutlined->xray));
+
+	if(ImGui::CollapsingHeader("Outlined Objects")) {
+		for(int i = 0; i < pOutlined->NUM_OUTLINED_OBJS; i++) {
+			ImGui::PushID(i);
+
+			std::string header = "Object " + std::to_string(i+1);
+			ImGui::Text(header.data());
+
+			ImGui::DragFloat3("Position", &(pOutlined->transforms[i].position.x), 0.05f);
+			ImGui::DragFloat3("Rotation", &(pOutlined->rotations[i].x), 0.05f, -360.0f, 360.0f);
+			ImGui::DragFloat3("Scale", &(pOutlined->transforms[i].scale.x), 0.05f);
+
+			pOutlined->transforms[i].rotation = glm::quat(glm::radians(pOutlined->rotations[i]));
+
+			ImGui::PopID();
+		}
+	}
+
+	ImGui::End(); // end window: Settings
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

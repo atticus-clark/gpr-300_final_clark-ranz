@@ -9,6 +9,10 @@ OutlinedObjs::OutlinedObjs() {
 	transforms[1].position = glm::vec3(0.0f, 0.0f, 0.0f);
 	transforms[2].position = glm::vec3(3.0f, 0.0f, 0.0f);
 
+	rotations[0] = glm::vec3();
+	rotations[1] = glm::vec3();
+	rotations[2] = glm::vec3();
+
 	colors[0] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	colors[1] = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	colors[2] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -34,8 +38,8 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	// 1st render pass: Draw objects as normal while writing to the stencil buffer.
 
 	// setup
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilMask(0xFF);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF); // makes all fragments pass the stencil test
+	glStencilMask(0xFF); // enable writing to stencil buffer
 
 	// draw objects
 	for(int i = 0; i < NUM_OUTLINED_OBJS; i++) {
@@ -52,9 +56,13 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	 * pass, which looks like an outline. */
 
 	// setup 
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilMask(0x00);
-	glDisable(GL_DEPTH_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // don't draw any fragments that were drawn before
+										 // aka, only draw the scaled-up parts of the objects
+	glStencilMask(0x00); // disable writing to stencil buffer
+
+	// disabling depth testing makes outline always visible even if object is obscured
+	// if object is obscured, it can't block the scaled-up draw so outline becomes a solid block
+	xray ? glDisable(GL_DEPTH_TEST) : false;
 
 	outlineShader.use();
 	outlineShader.setVec4("_Color", outlineColor);
@@ -72,5 +80,5 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	// cleanup
 	glStencilMask(0xFF);
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST); // make sure to reenable depth testing for future frames!
 }

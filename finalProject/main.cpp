@@ -1,7 +1,6 @@
 #pragma once
 
 #include "notmain.h"
-#include "../finalProject/assets/program/outlines.h"
 
 int main()
 {
@@ -74,7 +73,8 @@ int main()
 	waterShader.setInt("refractionTex", 1);
 	waterShader.setInt("dudvMap", 2);
 
-	OutlinedObjs outlinedObjs = OutlinedObjs();
+	OutlinedObjs outlined;
+	pOutlined = &outlined;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -124,9 +124,9 @@ int main()
 		unbindFramebuffer();
 		waterMesh.draw();
 
-		outlinedObjs.Render(viewProj);
+		outlined.Render(viewProj); // render outlined objects
 
-		drawUI();
+		drawUI(deltaTime);
 
 		glfwSwapBuffers(window);
 	}
