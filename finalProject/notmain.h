@@ -113,19 +113,21 @@ void drawUI(float dt) {
 	}
 
 	ImGui::Checkbox("Xray", &(pOutlined->xray));
+	ImGui::ColorEdit3("Outline Color", &(pOutlined->outlineColor.r));
+	ImGui::DragFloat("Outline Thickness", &(pOutlined->outlineScale), 0.01f, 0.0f, 0.2f);
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
-		for(int i = 0; i < pOutlined->NUM_OUTLINED_OBJS; i++) {
+		for(int i = 0; i < pOutlined->NUM_OBJS; i++) {
 			ImGui::PushID(i);
 
 			std::string header = "Object " + std::to_string(i+1);
 			ImGui::Text(header.data());
 
-			ImGui::DragFloat3("Position", &(pOutlined->transforms[i].position.x), 0.05f);
-			ImGui::DragFloat3("Rotation", &(pOutlined->rotations[i].x), 0.05f, -360.0f, 360.0f);
-			ImGui::DragFloat3("Scale", &(pOutlined->transforms[i].scale.x), 0.05f);
+			ImGui::DragFloat3("Position", &(pOutlined->objs[i].transform.position.x), 0.05f);
+			ImGui::DragFloat3("Rotation", &(pOutlined->objs[i].rotation.x), 0.05f, -360.0f, 360.0f);
+			ImGui::DragFloat3("Scale", &(pOutlined->objs[i].transform.scale.x), 0.05f, 0.0f, 10.0f);
 
-			pOutlined->transforms[i].rotation = glm::quat(glm::radians(pOutlined->rotations[i]));
+			pOutlined->objs[i].UpdateRotation();
 
 			ImGui::PopID();
 		}

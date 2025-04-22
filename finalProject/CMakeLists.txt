@@ -15,7 +15,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/assets/
 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/)
 
 install(FILES ${FINALPROJ_INC} DESTINATION include/finalProj)
-add_executable(finalProj ${FINALPROJ_SRC} ${FINALPROJ_INC} "notmain.h" "assets/outlines/outlines.cpp" "assets/outlines/outlines.h")
+add_executable(finalProj ${FINALPROJ_SRC} ${FINALPROJ_INC} "notmain.h" "assets/outlines/outlines.h" "assets/outlines/outlines.cpp")
 target_link_libraries(finalProj PUBLIC core IMGUI assimp)
 target_include_directories(finalProj PUBLIC ${CORE_INC_DIR} ${stb_INCLUDE_DIR})
 

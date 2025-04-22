@@ -7,26 +7,35 @@
 #include <ew/texture.h>
 #include <ew/procGen.h>
 
+class Object {
+public:
+	Object() {}
+	~Object() {}
+
+	ew::Mesh mesh = ew::Mesh();
+	ew::Transform transform = ew::Transform();
+	glm::vec3 rotation = glm::vec3();
+	glm::vec4 color = glm::vec4(1.0f);
+
+	void UpdateRotation() { transform.rotation = glm::quat(glm::radians(rotation)); }
+};
+
 class OutlinedObjs {
 public:
 	OutlinedObjs();
 	~OutlinedObjs();
 
-	static const unsigned int NUM_OUTLINED_OBJS = 3; // i hate that this has to be static
+	static const unsigned int NUM_OBJS = 3; // i hate that this has to be static
 
-	ew::Transform transforms[NUM_OUTLINED_OBJS];
-	glm::vec3 rotations[NUM_OUTLINED_OBJS]; // this is redundant but makes rotating from the GUI cleaner
-	glm::vec4 colors[NUM_OUTLINED_OBJS];
+	Object objs[NUM_OBJS];
 
 	glm::vec4 outlineColor = glm::vec4(1.0f);
-	float outlineScale = 1.05f;
-
+	float outlineScale = 0.05f;
 	bool xray = false;
 
 	void Render(const glm::mat4& viewProj);
 
 private:
-	ew::Mesh meshes[NUM_OUTLINED_OBJS];
 	ew::Shader shader = ew::Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
 	ew::Shader outlineShader = ew::Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
 };

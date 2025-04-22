@@ -1,25 +1,17 @@
 #include "outlines.h"
 
 OutlinedObjs::OutlinedObjs() {
-	meshes[0] = ew::createCube(2.0f);
-	meshes[1] = ew::createCylinder(1.0f, 2.0f, 25);
-	meshes[2] = ew::createSphere(1.0f, 25);
+	objs[0].mesh = ew::createCube(2.0f);
+	objs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
+	objs[2].mesh = ew::createSphere(1.0f, 25);
 
-	transforms[0].position = glm::vec3(-3.0f, 0.0f, 0.0f);
-	transforms[1].position = glm::vec3(0.0f, 0.0f, 0.0f);
-	transforms[2].position = glm::vec3(3.0f, 0.0f, 0.0f);
+	objs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	objs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	objs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
 
-	rotations[0] = glm::vec3();
-	rotations[1] = glm::vec3();
-	rotations[2] = glm::vec3();
-
-	colors[0] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	colors[1] = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-	colors[2] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	//GLuint cubeTexture = ew::loadTexture("assets/brick_color.jpg");
-	//GLuint cylinderTexture = ew::loadTexture("assets/brick_color.jpg");
-	//GLuint sphereTexture = ew::loadTexture("assets/brick_color.jpg");
+	objs[0].color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	objs[1].color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	objs[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 OutlinedObjs::~OutlinedObjs() {}
@@ -47,10 +39,10 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	glStencilMask(0xFF); // enable writing to stencil buffer
 
 	// draw objects //
-	for(int i = 0; i < NUM_OUTLINED_OBJS; i++) {
-		shader.setMat4("_Model", transforms[i].modelMatrix());
-		shader.setVec4("_Color", colors[i]);
-		meshes[i].draw();
+	for(int i = 0; i < NUM_OBJS; i++) {
+		shader.setMat4("_Model", objs[i].transform.modelMatrix());
+		shader.setVec4("_Color", objs[i].color);
+		objs[i].mesh.draw();
 	}
 
 	// ------------------------------------------------------------------------------------------- //
@@ -73,14 +65,14 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	outlineShader.use();
 	outlineShader.setVec4("_Color", outlineColor);
 
-	glm::vec3 scale = glm::vec3(outlineScale, outlineScale, outlineScale);
+	glm::vec3 scale = glm::vec3(outlineScale + 1, outlineScale + 1, outlineScale + 1);
 	glm::mat4 scaledModel;
 
 	// draw objects
-	for(int i = 0; i < NUM_OUTLINED_OBJS; i++) {
-		scaledModel = glm::scale(transforms[i].modelMatrix(), scale);
+	for(int i = 0; i < NUM_OBJS; i++) {
+		scaledModel = glm::scale(objs[i].transform.modelMatrix(), scale);
 		outlineShader.setMat4("_Model", scaledModel);
-		meshes[i].draw();
+		objs[i].mesh.draw();
 	}
 
 	// cleanup
