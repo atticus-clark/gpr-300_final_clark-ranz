@@ -40,9 +40,9 @@ int main() {
 	objRend.SetOutlineShaderPtr(&outlineShader);
 
 	// texture units //
-	glBindTexture(0, aObjs[0].texture);
-	glBindTexture(1, aObjs[1].texture);
-	glBindTexture(2, aObjs[2].texture);
+	glBindTextureUnit(0, aObjs[0].texture);
+	glBindTextureUnit(1, aObjs[1].texture);
+	glBindTextureUnit(2, aObjs[2].texture);
 	glBindTextureUnit(3, objRend.depthMapTexture);
 
 	// render loop //

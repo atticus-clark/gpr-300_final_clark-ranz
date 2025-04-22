@@ -20,12 +20,16 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 	// draw objects //
 	glCullFace(GL_FRONT); // peter panning solution doesn't work for monkey model
 	for(int i = 0; i < NUM_OBJS; i++) {
+		glActiveTexture(GL_TEXTURE0+i);
+		glBindTexture(GL_TEXTURE_2D, objs[i].texture);
+
 		pDepthShader->setMat4("_Model", objs[i].transform.modelMatrix());
 		objs[i].mesh.draw();
 	}
 	glCullFace(GL_BACK); // peter panning solution doesn't work for monkey model
 
 	// reset viewport //
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, *pWidth, *pHeight);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -51,10 +55,15 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 	pMainShader->setFloat("_MaxBias", maxBias);
 	pMainShader->setFloat("_MinBias", minBias);
 
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 	pMainShader->setInt("_ShadowMap", 3);
 
 	// draw objects //
 	for(int i = 0; i < NUM_OBJS; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, objs[i].texture);
+
 		pMainShader->setInt("_DiffuseTexture", i);
 
 		pMainShader->setFloat("_Material.Ka", objs[i].material.Ka);
