@@ -22,12 +22,50 @@ int main() {
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f;
 
+	// framebuffers //
+	// refraction framebuffer
+	unsigned int refractionFramebuffer;
+	glGenFramebuffers(1, &refractionFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	GLuint refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	unbindFramebuffer();
+
+	// reflection framebuffer
+	unsigned int reflectionFramebuffer;
+	glGenFramebuffers(1, &reflectionFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	GLuint reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	unbindFramebuffer();
+
+	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
+
 	// shaders //
+	ew::Shader waterShader = ew::Shader("assets/shaders/water.vert", "assets/shaders/water.frag");
+
 	ew::Shader depthShader = ew::Shader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
 	ew::Shader mainShader = ew::Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
 	ew::Shader outlineShader = ew::Shader("assets/shaders/outline.vert", "assets/shaders/outline.frag");
 
-	// setup objects & renderer //
+	// shader calls //
+	waterShader.use();
+	waterShader.setInt("reflectionTex", 0);
+	waterShader.setInt("refractionTex", 1);
+	waterShader.setInt("dudvMap", 2);
+
+	// objects //
+	ew::Mesh waterMesh(ew::createPlane(10.0f, 10.0f, 20));
+	ew::Transform waterTransform;
+	int waterHeight = -2;
+	waterTransform.position = glm::vec3(0, waterHeight, 0);
+
+	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -waterHeight);
+	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, waterHeight);
+
+	// setup outlined objects & renderer //
 	SetupOutlinedObjs();
 
 	objRend.SetupDepthMap();
@@ -39,11 +77,15 @@ int main() {
 	objRend.SetMainShaderPtr(&mainShader);
 	objRend.SetOutlineShaderPtr(&outlineShader);
 
-	// texture units //
+	// textures //
 	glBindTextureUnit(GL_TEXTURE0, aObjs[0].texture);
 	glBindTextureUnit(GL_TEXTURE1, aObjs[1].texture);
 	glBindTextureUnit(GL_TEXTURE2, aObjs[2].texture);
 	glBindTextureUnit(GL_TEXTURE3, objRend.depthMapTexture);
+
+	glBindTextureUnit(4, reflectionTex);
+	glBindTextureUnit(5, refractionTex);
+	glBindTextureUnit(6, dudvMap);
 
 	// render loop //
 	while(!glfwWindowShouldClose(window)) {
@@ -55,12 +97,42 @@ int main() {
 
 		cameraController.move(window, &camera, deltaTime);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
+		float distance = 2 * (camera.position.y - waterHeight);
+
+		//moveFactor += WAVE_SPEED * deltaTime;
+		//moveFactor %= 1;
 
 		// RENDER //
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		// using the stencil buffer, gotta remember to clear it every frame!
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glStencilMask(0x00); // disable stencil buffer writing for non-outlined objects
+
+		// shader calls
+		waterShader.use();
+		waterShader.setMat4("_Model", waterTransform.modelMatrix());
+		waterShader.setFloat("moveFactor", moveFactor);
+
+		// reflection
+		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
+		camera.position.y -= distance;
+		cameraController.pitch = -cameraController.pitch;
+		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setVec4("_Plane", reflectionClipPlane);
+		waterMesh.draw();
+
+		camera.position.y += distance;
+		cameraController.pitch = -cameraController.pitch;
+
+		// refraction
+		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
+		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setVec4("_Plane", refractionClipPlane);
+		waterMesh.draw();
+
+		glDisable(GL_CLIP_DISTANCE0);
+		unbindFramebuffer();
+		waterMesh.draw();
 
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
