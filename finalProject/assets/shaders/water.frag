@@ -1,6 +1,6 @@
 #version 450
 
-in vec4 clipSpace;
+in vec4 ClipSpace;
 in vec2 TexCoords;
 in vec3 WorldNormal;
 
@@ -18,7 +18,7 @@ const float waveStrength = 0.02;
 
 void main()
 {
-	vec2 ndc = (clipSpace.xy / clipSpace.w) / 2.0 + 0.5;
+	vec2 ndc = (ClipSpace.xy / ClipSpace.w) / 2.0 + 0.5;
 	vec2 refractTexCoords = ndc;
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
