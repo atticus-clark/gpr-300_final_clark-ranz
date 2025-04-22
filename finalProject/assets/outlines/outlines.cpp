@@ -68,7 +68,7 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 
 	// this is what actually determines if outlines are visible through walls or not
 	// refer to xray.md to learn why this only works with the first glStencilOp setup
-	xray ? glDisable(GL_DEPTH_TEST);
+	xray ? glDisable(GL_DEPTH_TEST) : false;
 
 	outlineShader.use();
 	outlineShader.setVec4("_Color", outlineColor);
@@ -86,5 +86,5 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 	// cleanup
 	glStencilMask(0xFF);
 	glStencilFunc(GL_ALWAYS, 0, 0xFF);
-	xray ? glEnable(GL_DEPTH_TEST); // if depth testing was disabled, make sure to reenable it
+	xray ? glEnable(GL_DEPTH_TEST) : false; // if depth testing was disabled, make sure to reenable it
 }
