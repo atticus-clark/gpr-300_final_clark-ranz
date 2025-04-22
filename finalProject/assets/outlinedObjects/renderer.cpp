@@ -27,7 +27,7 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 	// reset viewport //
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, *pWidth, *pHeight);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
@@ -50,7 +50,7 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 	pMainShader->setFloat("_MaxBias", maxBias);
 	pMainShader->setFloat("_MinBias", minBias);
 
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 	pMainShader->setInt("_ShadowMap", 3);
 
