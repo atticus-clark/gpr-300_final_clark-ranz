@@ -20,7 +20,7 @@
 #include <ew/transform.h>
 #include <ew/texture.h>
 
-#include "../finalProject/assets/program/compositeRenderer.h"
+#include "../finalProject/assets/outlinedObjects/renderer.h"
 
 // Global state //
 int screenWidth = 1080;
@@ -36,14 +36,16 @@ const int REFRACTION_WIDTH = 640;
 
 const float WAVE_SPEED = 0.03f;
 
+float moveFactor = 0;
+
 ew::Camera camera;
 ew::CameraController cameraController;
 
-float moveFactor = 0;
+Light light;
 
 const int NUM_OBJS = 3;
 Object* aObjs;
-CompositeRenderer* pCompRend;
+ObjectRenderer objRend = ObjectRenderer();
 
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)
@@ -115,7 +117,7 @@ void drawUI(float dt) {
 		resetCamera(&camera, &cameraController);
 	}
 
-	ImGui::Checkbox("Xray", &(pCompRend->xray));
+	ImGui::Checkbox("Xray", &(objRend.xray));
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
 		for(int i = 0; i < NUM_OBJS; i++) {
@@ -180,18 +182,18 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 	return window;
 }
 
-void SetupOutlinedObjs(Object* objs) {
-	aObjs = objs; // this is a stupid idea
+void SetupOutlinedObjs() {
+	aObjs = new Object[NUM_OBJS];
 
-	objs[0].mesh = ew::createCube(2.0f);
-	objs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
-	objs[2].mesh = ew::createSphere(1.0f, 25);
+	aObjs[0].mesh = ew::createCube(2.0f);
+	aObjs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
+	aObjs[2].mesh = ew::createSphere(1.0f, 25);
 
-	objs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
-	objs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	objs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
+	aObjs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	aObjs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	aObjs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
 
-	objs[0].texture = ew::loadTexture("assets/textures/brick_color.jpg");
-	objs[1].texture = ew::loadTexture("assets/textures/brick_color.jpg");
-	objs[2].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[0].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[1].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[2].texture = ew::loadTexture("assets/textures/brick_color.jpg");
 }

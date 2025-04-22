@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ew/external/glad.h>
-#include <ew/mesh.h>
+#include <ew/model.h>
 #include <ew/transform.h>
 
 struct Material {
