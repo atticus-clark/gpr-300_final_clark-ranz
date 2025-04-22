@@ -32,6 +32,29 @@ int main()
 	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -waterHeight);
 	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, waterHeight);
 
+	// skybox //
+	// skybox textures
+	std::vector<std::string> faces
+	{
+		"assets/textures/right.jpg",
+		"assets/textures/left.jpg",
+		"assets/textures/top.jpg",
+		"assets/textures/bottom.jpg",
+		"assets/textures/front.jpg",
+		"assets/textures/back.jpg"
+	};
+	GLuint cubemapTexture = loadCubemap(faces);
+
+	// skybox VAO & VBO
+	unsigned int skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
 	// framebuffers //
 	// refraction framebuffer
 	unsigned int refractionFramebuffer;
@@ -55,6 +78,7 @@ int main()
 
 	// shaders //
 	ew::Shader waterShader = ew::Shader("assets/shaders/water.vert", "assets/shaders/water.frag");
+	ew::Shader skyboxShader = ew::Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
 
 	ew::Shader depthShader = ew::Shader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
 	ew::Shader mainShader = ew::Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
@@ -88,7 +112,10 @@ int main()
 	waterShader.setInt("refractionTex", 1);
 	waterShader.setInt("dudvMap", 2);
 
-	while(!glfwWindowShouldClose(window)) {
+	skyboxShader.use();
+	skyboxShader.setInt("skybox", cubemapTexture);
+
+	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		float time = (float)glfwGetTime();
@@ -99,7 +126,7 @@ int main()
 		float distance = 2 * (camera.position.y - waterHeight);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
 
-		//moveFactor += WAVE_SPEED * deltaTime;
+		moveFactor += WAVE_SPEED * deltaTime;
 		//moveFactor %= 1;
 
 		// RENDER //
@@ -137,6 +164,18 @@ int main()
 		waterMesh.draw();
 
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
+
+		// skybox
+		glDepthFunc(GL_LEQUAL); // depth
+		skyboxShader.use();
+		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		// skybox cube
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS); // depth
 
 		drawUI(deltaTime);
 
