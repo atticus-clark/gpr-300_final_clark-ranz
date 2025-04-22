@@ -23,7 +23,7 @@ int main()
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f;
 
-	glm::vec3 lightPos(0.0, -1.0, 0.0);
+	LightSource light;
 
 	// objects
 	ew::Mesh waterMesh(ew::createPlane(10.0f, 10.0f, 20));
@@ -53,13 +53,14 @@ int main()
 	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	unbindFramebuffer();
 
+	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
+
 	// shaders
 	ew::Shader waterShader = ew::Shader("assets/shaders/water.vert", "assets/shaders/water.frag");
 
 	// textures
 	glBindTextureUnit(0, reflectionTex);
 	glBindTextureUnit(1, refractionTex);
-	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
 	glBindTextureUnit(2, dudvMap);
 
 	//glBindTextureUnit(3, cubeTexture);
@@ -72,8 +73,13 @@ int main()
 	waterShader.setInt("refractionTex", 1);
 	waterShader.setInt("dudvMap", 2);
 
-	OutlinedObjs outlined;
-	pOutlined = &outlined;
+	// outline stuff //
+	CompositeRenderer outlinedObjRenderer;
+	outlinedObjRenderer.Setup(&camera, &light, &screenWidth, &screenHeight);
+	pCompRend = &outlinedObjRenderer;
+
+	Object outlinedObjs[NUM_OBJS];
+	SetupOutlinedObjs(outlinedObjs);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -93,8 +99,8 @@ int main()
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
 		// using the stencil buffer, gotta remember to clear it every frame!
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		glStencilMask(0x00); // disable stencil buffer writing for non-outlined objects
+
 		glEnable(GL_CLIP_DISTANCE0);
 
 		// shader calls
@@ -123,7 +129,7 @@ int main()
 		unbindFramebuffer();
 		waterMesh.draw();
 
-		outlined.Render(viewProj); // render outlined objects
+		outlinedObjRenderer.Render(outlinedObjs, NUM_OBJS, viewProj); // render outlined objects
 
 		drawUI(deltaTime);
 

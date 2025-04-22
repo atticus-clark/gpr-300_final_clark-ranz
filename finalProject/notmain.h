@@ -11,17 +11,18 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <ew/camera.h>
+#include <ew/cameraController.h>
+
 #include <ew/shader.h>
 #include <ew/model.h>
-#include <ew/camera.h>
-#include <ew/transform.h>
-#include <ew/cameraController.h>
-#include <ew/texture.h>
 #include <ew/procGen.h>
+#include <ew/transform.h>
+#include <ew/texture.h>
 
-#include "../finalProject/assets/outlines/outlines.h"
+#include "../finalProject/assets/program/compositeRenderer.h"
 
-// Global state
+// Global state //
 int screenWidth = 1080;
 int screenHeight = 720;
 float prevFrameTime;
@@ -33,14 +34,16 @@ const int REFLECTION_WIDTH = 320;
 const int REFRACTION_HEIGHT = 360;
 const int REFRACTION_WIDTH = 640;
 
-const float WAVE_SPEED = 0.03;
+const float WAVE_SPEED = 0.03f;
 
 ew::Camera camera;
 ew::CameraController cameraController;
 
 float moveFactor = 0;
 
-OutlinedObjs* pOutlined;
+const int NUM_OBJS = 3;
+Object* aObjs;
+CompositeRenderer* pCompRend;
 
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)
@@ -112,20 +115,18 @@ void drawUI(float dt) {
 		resetCamera(&camera, &cameraController);
 	}
 
-	ImGui::Checkbox("Xray", &(pOutlined->xray));
+	ImGui::Checkbox("Xray", &(pCompRend->xray));
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
-		for(int i = 0; i < pOutlined->NUM_OUTLINED_OBJS; i++) {
+		for(int i = 0; i < NUM_OBJS; i++) {
 			ImGui::PushID(i);
 
 			std::string header = "Object " + std::to_string(i+1);
 			ImGui::Text(header.data());
 
-			ImGui::DragFloat3("Position", &(pOutlined->transforms[i].position.x), 0.05f);
-			ImGui::DragFloat3("Rotation", &(pOutlined->rotations[i].x), 0.05f, -360.0f, 360.0f);
-			ImGui::DragFloat3("Scale", &(pOutlined->transforms[i].scale.x), 0.05f);
-
-			pOutlined->transforms[i].rotation = glm::quat(glm::radians(pOutlined->rotations[i]));
+			ImGui::DragFloat3("Position", &(aObjs[i].transform.position.x), 0.05f);
+			ImGui::DragFloat3("Rotation", &(aObjs[i].rotation.x), 0.05f, -360.0f, 360.0f);
+			ImGui::DragFloat3("Scale", &(aObjs[i].transform.scale.x), 0.05f);
 
 			ImGui::PopID();
 		}
@@ -177,4 +178,20 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 	ImGui_ImplOpenGL3_Init();
 
 	return window;
+}
+
+void SetupOutlinedObjs(Object* objs) {
+	aObjs = objs; // this is a stupid idea
+
+	objs[0].mesh = ew::createCube(2.0f);
+	objs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
+	objs[2].mesh = ew::createSphere(1.0f, 25);
+
+	objs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	objs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	objs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
+
+	objs[0].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	objs[1].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	objs[2].texture = ew::loadTexture("assets/textures/brick_color.jpg");
 }

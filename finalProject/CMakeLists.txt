@@ -15,7 +15,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/assets/
 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/)
 
 install(FILES ${FINALPROJ_INC} DESTINATION include/finalProj)
-add_executable(finalProj ${FINALPROJ_SRC} ${FINALPROJ_INC} "notmain.h" "assets/program/outlines.cpp" "assets/program/outlines.h")
+add_executable(finalProj ${FINALPROJ_SRC} ${FINALPROJ_INC} "notmain.h" "assets/program/object.h" "assets/program/light.h" "assets/program/compositeRenderer.h" "assets/program/compositeRenderer.cpp" "assets/program/regular.h" "assets/program/regular.cpp" "assets/program/shadows.h" "assets/program/shadows.cpp" "assets/program/outlines.h" "assets/program/outlines.cpp")
 target_link_libraries(finalProj PUBLIC core IMGUI assimp)
 target_include_directories(finalProj PUBLIC ${CORE_INC_DIR} ${stb_INCLUDE_DIR})
 
