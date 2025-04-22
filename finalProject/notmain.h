@@ -114,7 +114,7 @@ void drawUI(float dt) {
 
 	ImGui::Checkbox("Xray", &(pOutlined->xray));
 	ImGui::ColorEdit3("Outline Color", &(pOutlined->outlineColor.r));
-	ImGui::DragFloat("Outline Thickness", &(pOutlined->outlineScale), 0.01f, 0.0f, 0.2f);
+	ImGui::DragFloat("Outline Thickness", &(pOutlined->outlineScale), 0.001f, 0.0f, 0.2f);
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
 		for(int i = 0; i < pOutlined->NUM_OBJS; i++) {

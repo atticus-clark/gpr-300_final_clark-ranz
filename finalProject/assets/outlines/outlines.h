@@ -29,7 +29,7 @@ public:
 
 	Object objs[NUM_OBJS];
 
-	glm::vec4 outlineColor = glm::vec4(1.0f);
+	glm::vec4 outlineColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	float outlineScale = 0.05f;
 	bool xray = false;
 
@@ -37,5 +37,5 @@ public:
 
 private:
 	ew::Shader shader = ew::Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
-	ew::Shader outlineShader = ew::Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
+	ew::Shader outlineShader = ew::Shader("assets/shaders/singleColor.vert", "assets/shaders/singleColor.frag");
 };

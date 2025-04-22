@@ -72,8 +72,7 @@ int main()
 	waterShader.setInt("refractionTex", 1);
 	waterShader.setInt("dudvMap", 2);
 
-	OutlinedObjs outlined;
-	pOutlined = &outlined;
+	pOutlined = new OutlinedObjs();
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -123,11 +122,13 @@ int main()
 		unbindFramebuffer();
 		waterMesh.draw();
 
-		outlined.Render(viewProj); // render outlined objects
+		pOutlined->Render(viewProj); // render outlined objects
 
 		drawUI(deltaTime);
 
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
+
+	delete pOutlined;
 }
