@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include <iostream>
 
 void ObjectRenderer::Render(Object* objs, const int& NUM_OBJS) {
 	ShadowPass(objs, NUM_OBJS);
@@ -18,15 +19,10 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// draw objects //
-	glCullFace(GL_FRONT); // peter panning solution doesn't work for monkey model
 	for(int i = 0; i < NUM_OBJS; i++) {
-		glActiveTexture(GL_TEXTURE0+i);
-		glBindTexture(GL_TEXTURE_2D, objs[i].texture);
-
 		pDepthShader->setMat4("_Model", objs[i].transform.modelMatrix());
 		objs[i].mesh.draw();
 	}
-	glCullFace(GL_BACK); // peter panning solution doesn't work for monkey model
 
 	// reset viewport //
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -35,8 +31,6 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 }
 
 void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
-	pMainShader->use();
-
 	// these slightly change how the stencil buffer is written to
 	// refer to xray.md to learn about what exactly this does
 	xray ? glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE) : glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
@@ -45,6 +39,7 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 	glStencilMask(0xFF); // enable writing to stencil buffer
 
 	// camera and light setup //
+	pMainShader->use();
 	pMainShader->setMat4("_ViewProjection", pCamera->projectionMatrix() * pCamera->viewMatrix());
 	pMainShader->setVec3("_EyePos", pCamera->position);
 
@@ -72,6 +67,8 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 		pMainShader->setFloat("_Material.Shininess", objs[i].material.Shininess);
 
 		pMainShader->setMat4("_Model", objs[i].transform.modelMatrix());
+
+		objs[i].mesh.draw();
 	}
 }
 
