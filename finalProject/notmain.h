@@ -11,17 +11,18 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <ew/camera.h>
+#include <ew/cameraController.h>
+
 #include <ew/shader.h>
 #include <ew/model.h>
-#include <ew/camera.h>
-#include <ew/transform.h>
-#include <ew/cameraController.h>
-#include <ew/texture.h>
 #include <ew/procGen.h>
+#include <ew/transform.h>
+#include <ew/texture.h>
 
-#include "../finalProject/assets/outlines/outlines.h"
+#include "../finalProject/assets/outlinedObjects/renderer.h"
 
-// Global state
+// Global state //
 int screenWidth = 1080;
 int screenHeight = 720;
 float prevFrameTime;
@@ -33,14 +34,18 @@ const int REFLECTION_WIDTH = 320;
 const int REFRACTION_HEIGHT = 360;
 const int REFRACTION_WIDTH = 640;
 
-const float WAVE_SPEED = 0.03;
+const float WAVE_SPEED = 0.03f;
+
+float moveFactor = 0;
 
 ew::Camera camera;
 ew::CameraController cameraController;
 
-float moveFactor = 0;
+Light light;
 
-OutlinedObjs* pOutlined;
+const int NUM_OBJS = 3;
+Object* aObjs;
+ObjectRenderer objRend = ObjectRenderer();
 
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)
@@ -112,22 +117,18 @@ void drawUI(float dt) {
 		resetCamera(&camera, &cameraController);
 	}
 
-	ImGui::Checkbox("Xray", &(pOutlined->xray));
-	ImGui::ColorEdit3("Outline Color", &(pOutlined->outlineColor.r));
-	ImGui::DragFloat("Outline Thickness", &(pOutlined->outlineScale), 0.001f, 0.0f, 0.2f);
+	ImGui::Checkbox("Xray", &(objRend.xray));
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
-		for(int i = 0; i < pOutlined->NUM_OBJS; i++) {
+		for(int i = 0; i < NUM_OBJS; i++) {
 			ImGui::PushID(i);
 
 			std::string header = "Object " + std::to_string(i+1);
 			ImGui::Text(header.data());
 
-			ImGui::DragFloat3("Position", &(pOutlined->objs[i].transform.position.x), 0.05f);
-			ImGui::DragFloat3("Rotation", &(pOutlined->objs[i].rotation.x), 0.05f, -360.0f, 360.0f);
-			ImGui::DragFloat3("Scale", &(pOutlined->objs[i].transform.scale.x), 0.05f, 0.0f, 10.0f);
-
-			pOutlined->objs[i].UpdateRotation();
+			ImGui::DragFloat3("Position", &(aObjs[i].transform.position.x), 0.05f);
+			ImGui::DragFloat3("Rotation", &(aObjs[i].rotation.x), 0.05f, -360.0f, 360.0f);
+			ImGui::DragFloat3("Scale", &(aObjs[i].transform.scale.x), 0.05f);
 
 			ImGui::PopID();
 		}
@@ -179,4 +180,20 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 	ImGui_ImplOpenGL3_Init();
 
 	return window;
+}
+
+void SetupOutlinedObjs() {
+	aObjs = new Object[NUM_OBJS];
+
+	aObjs[0].mesh = ew::createCube(2.0f);
+	aObjs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
+	aObjs[2].mesh = ew::createSphere(1.0f, 25);
+
+	aObjs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	aObjs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	aObjs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
+
+	aObjs[0].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[1].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[2].texture = ew::loadTexture("assets/textures/brick_color.jpg");
 }

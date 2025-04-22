@@ -17,15 +17,13 @@ int main()
 	glEnable(GL_STENCIL_TEST); // enable stencil testing
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // tells OpenGL how to determine if it should discard a fragment
 
-	// camera
+	// camera //
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
 	camera.target = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f;
 
-	glm::vec3 lightPos(0.0, -1.0, 0.0);
-
-	// objects
+	// objects //
 	ew::Mesh waterMesh(ew::createPlane(10.0f, 10.0f, 20));
 	ew::Transform waterTransform;
 	int waterHeight = -2;
@@ -53,28 +51,44 @@ int main()
 	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	unbindFramebuffer();
 
-	// shaders
+	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
+
+	// shaders //
 	ew::Shader waterShader = ew::Shader("assets/shaders/water.vert", "assets/shaders/water.frag");
 
-	// textures
+	ew::Shader depthShader = ew::Shader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
+	ew::Shader mainShader = ew::Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
+	ew::Shader outlineShader = ew::Shader("assets/shaders/outline.vert", "assets/shaders/outline.frag");
+
+	// setup outlined objects & renderer //
+	SetupOutlinedObjs();
+
+	objRend.SetupDepthMap();
+	objRend.SetCameraPtr(&camera);
+	objRend.SetLightPtr(&light);
+	objRend.SetScreenSizePtrs(&screenWidth, &screenHeight);
+
+	objRend.SetDepthShaderPtr(&depthShader);
+	objRend.SetMainShaderPtr(&mainShader);
+	objRend.SetOutlineShaderPtr(&outlineShader);
+
+	// textures //
 	glBindTextureUnit(0, reflectionTex);
 	glBindTextureUnit(1, refractionTex);
-	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
 	glBindTextureUnit(2, dudvMap);
 
-	//glBindTextureUnit(3, cubeTexture);
-	//glBindTextureUnit(4, cylinderTexture);
-	//glBindTextureUnit(5, sphereTexture);
+	glBindTextureUnit(3, objRend.depthMapTexture);
+	glBindTextureUnit(4, aObjs[0].texture);
+	glBindTextureUnit(5, aObjs[1].texture);
+	glBindTextureUnit(6, aObjs[2].texture);
 
-	// shader calls
+	// shader calls //
 	waterShader.use();
 	waterShader.setInt("reflectionTex", 0);
 	waterShader.setInt("refractionTex", 1);
 	waterShader.setInt("dudvMap", 2);
 
-	pOutlined = new OutlinedObjs();
-
-	while (!glfwWindowShouldClose(window)) {
+	while(!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		float time = (float)glfwGetTime();
@@ -100,7 +114,7 @@ int main()
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setFloat("moveFactor", moveFactor);
-		
+
 		// reflection
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		camera.position.y -= distance;
@@ -122,7 +136,7 @@ int main()
 		unbindFramebuffer();
 		waterMesh.draw();
 
-		pOutlined->Render(viewProj); // render outlined objects
+		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
 		drawUI(deltaTime);
 
@@ -130,5 +144,5 @@ int main()
 	}
 	printf("Shutting down...");
 
-	delete pOutlined;
+	delete[] aObjs;
 }
