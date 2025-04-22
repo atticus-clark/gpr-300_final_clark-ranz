@@ -58,7 +58,7 @@ int main()
 
 	ew::Shader depthShader = ew::Shader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
 	ew::Shader mainShader = ew::Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
-	ew::Shader outlineShader = ew::Shader("assets/shaders/outline.vert", "assets/shaders/outline.frag");
+	ew::Shader outlineShader = ew::Shader("assets/shaders/singleColor.vert", "assets/shaders/singleColor.frag");
 
 	// setup outlined objects & renderer //
 	SetupOutlinedObjs();

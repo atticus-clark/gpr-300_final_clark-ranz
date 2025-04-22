@@ -118,6 +118,8 @@ void drawUI(float dt) {
 	}
 
 	ImGui::Checkbox("Xray", &(objRend.xray));
+	ImGui::ColorEdit3("Outline Color", &(objRend.outlineColor.r));
+	ImGui::DragFloat("Outline Thickness", &(objRend.outlineScale), 0.001f, 0.0f, 0.2f);
 
 	if(ImGui::CollapsingHeader("Outlined Objects")) {
 		for(int i = 0; i < NUM_OBJS; i++) {
@@ -127,10 +129,12 @@ void drawUI(float dt) {
 			ImGui::Text(header.data());
 
 			ImGui::DragFloat3("Position", &(aObjs[i].transform.position.x), 0.05f);
-			ImGui::DragFloat3("Rotation", &(aObjs[i].rotation.x), 0.05f, -360.0f, 360.0f);
-			ImGui::DragFloat3("Scale", &(aObjs[i].transform.scale.x), 0.05f);
+			ImGui::DragFloat3("Rotation", &(aObjs[i].rotation.x), 0.1f, -360.0f, 360.0f);
+			ImGui::DragFloat3("Scale", &(aObjs[i].transform.scale.x), 0.01f, 0.0f, 10.0f);
 
 			ImGui::PopID();
+
+			aObjs[i].UpdateRotation();
 		}
 	}
 
