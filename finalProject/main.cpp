@@ -14,9 +14,8 @@ int main()
 
 	/* code taken from the LearnOpenGL tutorial on Stencil Testing
 	* https://learnopengl.com/Advanced-OpenGL/Stencil-testing */
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glEnable(GL_STENCIL_TEST); // enable stencil testing
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // tells OpenGL how to determine if it should discard a fragment
 
 	// camera
 	camera.position = glm::vec3(0.0f, 0.0f, 5.0f);

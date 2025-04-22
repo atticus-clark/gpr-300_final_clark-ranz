@@ -19,7 +19,7 @@
 #include <ew/texture.h>
 #include <ew/procGen.h>
 
-#include "../finalProject/assets/program/outlines.h"
+#include "../finalProject/assets/outlines/outlines.h"
 
 // Global state
 int screenWidth = 1080;

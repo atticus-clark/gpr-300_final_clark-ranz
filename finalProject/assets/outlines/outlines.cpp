@@ -62,8 +62,8 @@ void OutlinedObjs::Render(const glm::mat4& viewProj) {
 
 	// setup //
 
-	// don't draw any fragments that were drawn before; aka, only draw the scaled-up parts of the objects
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); 
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // don't draw any fragments that were drawn before
+										 // aka, only draw the scaled-up parts of the objects
 	glStencilMask(0x00); // disable writing to stencil buffer
 
 	// this is what actually determines if outlines are visible through walls or not
