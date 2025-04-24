@@ -44,7 +44,7 @@ ew::CameraController cameraController;
 
 Light light;
 
-const int NUM_OBJS = 2;
+const int NUM_OBJS = 3;
 Object* aObjs;
 ObjectRenderer objRend = ObjectRenderer();
 
@@ -207,8 +207,6 @@ void drawUI(float dt) {
 			ImGui::DragFloat3("Scale", &(aObjs[i].transform.scale.x), 0.01f, 0.0f, 10.0f);
 
 			ImGui::PopID();
-
-			aObjs[i].UpdateRotation();
 		}
 	}
 
@@ -263,11 +261,17 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 void SetupOutlinedObjs() {
 	aObjs = new Object[NUM_OBJS];
 
-	aObjs[1].model = new ew::Model("assets/suzanne.obj");
+	aObjs[1].model = new ew::Model("assets/models/Suzanne.obj");
+	aObjs[2].model = new ew::Model("assets/models/15211_Wakeboard_v1_NEW.obj");
 
-	aObjs[0].transform.position = glm::vec3(-2.0f, 0.0f, 0.0f);
-	aObjs[1].transform.position = glm::vec3(2.0f, 0.0f, 0.0f);
+	aObjs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	aObjs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	aObjs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
 
 	aObjs[0].texture = ew::loadTexture("assets/textures/redPx.jpg");
 	aObjs[1].texture = ew::loadTexture("assets/textures/redPx.jpg");
+	aObjs[2].texture = ew::loadTexture("assets/textures/redPx.jpg");
+
+	aObjs[2].transform.scale = glm::vec3(0.01f, 0.01f, 0.01f);
+	aObjs[2].rotation = glm::vec3(0.0f, 90.0f, 90.0f);
 }

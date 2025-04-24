@@ -175,6 +175,7 @@ int main()
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS); // depth
 
+		for(int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
 		drawUI(deltaTime);
