@@ -21,7 +21,10 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 	// draw objects //
 	for(int i = 0; i < NUM_OBJS; i++) {
 		pDepthShader->setMat4("_Model", objs[i].transform.modelMatrix());
-		objs[i].mesh.draw();
+
+		// check if object has model or mesh
+		if(objs[i].model != nullptr) { objs[i].model->draw(); }
+		else { objs[i].mesh.draw(); }
 	}
 
 	// reset viewport //
@@ -50,6 +53,8 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 	pMainShader->setFloat("_MaxBias", maxBias);
 	pMainShader->setFloat("_MinBias", minBias);
 
+	pMainShader->setFloat("_CelLevels", 4.0f); // number of cel shading levels
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 	pMainShader->setInt("_ShadowMap", 3);
@@ -68,7 +73,9 @@ void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
 
 		pMainShader->setMat4("_Model", objs[i].transform.modelMatrix());
 
-		objs[i].mesh.draw();
+		// check if object has model or mesh
+		if(objs[i].model != nullptr) { objs[i].model->draw(); }
+		else { objs[i].mesh.draw(); }
 	}
 }
 
@@ -99,7 +106,10 @@ void ObjectRenderer::OutlinePass(Object* objs, const int& NUM_OBJS) {
 	for(int i = 0; i < NUM_OBJS; i++) {
 		scaledModel = glm::scale(objs[i].transform.modelMatrix(), scaleVec);
 		pOutlineShader->setMat4("_Model", scaledModel);
-		objs[i].mesh.draw();
+		
+		// check if object has model or mesh
+		if(objs[i].model != nullptr) { objs[i].model->draw(); }
+		else { objs[i].mesh.draw(); }
 	}
 
 	// cleanup //

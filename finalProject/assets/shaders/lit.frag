@@ -28,6 +28,8 @@ uniform sampler2D _ShadowMap;
 uniform float _MaxBias;
 uniform float _MinBias;
 
+uniform float _CelLevels;
+
 /* code taken from the LearnOpenGL tutorial on Shadow Mapping
 * https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping */
 float ShadowCalculation(vec4 fragPosLightSpace, float normalDotLightDir)
@@ -78,18 +80,18 @@ void main() {
     // diffuse
     vec3 lightDir = normalize(_LightPos - fs_in.WorldPos);
     float diff = max(dot(lightDir, normal), 0.0);
+    diff = floor(diff * _CelLevels) / _CelLevels; // cel shading (diffuse part)
     vec3 diffuse = _Material.Kd * diff * _LightColor.rgb;
 
     // specular
     vec3 viewDir = normalize(_EyePos - fs_in.WorldPos);
-    float spec = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    spec = pow(max(dot(normal, halfwayDir), 0.0), _Material.Shininess);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), _Material.Shininess);
+    spec = floor(spec * _CelLevels) / _CelLevels; // cel shading (specular part)
     vec3 specular = _Material.Ks * spec * _LightColor.rgb;
 
     // calculate shadow
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace, dot(normal, lightDir));
-
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
     
     FragColor = vec4(lighting, 1.0);

@@ -163,8 +163,6 @@ int main()
 		unbindFramebuffer();
 		waterMesh.draw();
 
-		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
-
 		// skybox
 		glDepthFunc(GL_LEQUAL); // depth
 		skyboxShader.use();
@@ -176,6 +174,8 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS); // depth
+
+		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
 		drawUI(deltaTime);
 

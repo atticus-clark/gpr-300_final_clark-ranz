@@ -44,7 +44,7 @@ ew::CameraController cameraController;
 
 Light light;
 
-const int NUM_OBJS = 3;
+const int NUM_OBJS = 2;
 Object* aObjs;
 ObjectRenderer objRend = ObjectRenderer();
 
@@ -263,15 +263,11 @@ GLFWwindow* initWindow(const char* title, int width, int height) {
 void SetupOutlinedObjs() {
 	aObjs = new Object[NUM_OBJS];
 
-	aObjs[0].mesh = ew::createCube(2.0f);
-	aObjs[1].mesh = ew::createCylinder(1.0f, 2.0f, 25);
-	aObjs[2].mesh = ew::createSphere(1.0f, 25);
+	aObjs[1].model = new ew::Model("assets/suzanne.obj");
 
-	aObjs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
-	aObjs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	aObjs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
+	aObjs[0].transform.position = glm::vec3(-2.0f, 0.0f, 0.0f);
+	aObjs[1].transform.position = glm::vec3(2.0f, 0.0f, 0.0f);
 
-	aObjs[0].texture = ew::loadTexture("assets/textures/brick_color.jpg");
-	aObjs[1].texture = ew::loadTexture("assets/textures/brick_color.jpg");
-	aObjs[2].texture = ew::loadTexture("assets/textures/brick_color.jpg");
+	aObjs[0].texture = ew::loadTexture("assets/textures/redPx.jpg");
+	aObjs[1].texture = ew::loadTexture("assets/textures/redPx.jpg");
 }
