@@ -80,14 +80,14 @@ void main() {
     // diffuse
     vec3 lightDir = normalize(_LightPos - fs_in.WorldPos);
     float diff = max(dot(lightDir, normal), 0.0);
-    diff = floor(diff * _CelLevels) / _CelLevels; // cel shading (diffuse part)
+    diff = floor(diff * _CelLevels) / _CelLevels; // cel shading
     vec3 diffuse = _Material.Kd * diff * _LightColor.rgb;
 
     // specular
     vec3 viewDir = normalize(_EyePos - fs_in.WorldPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), _Material.Shininess);
-    spec = floor(spec * _CelLevels) / _CelLevels; // cel shading (specular part)
+    spec = floor(spec * _CelLevels) / _CelLevels; // cel shading
     vec3 specular = _Material.Ks * spec * _LightColor.rgb;
 
     // calculate shadow
@@ -96,3 +96,7 @@ void main() {
     
     FragColor = vec4(lighting, 1.0);
 }
+
+/* cel shading code taken from "OpenGL 3D Game Tutorial 30: Cel Shading" by Thin Matrix
+ * https://www.youtube.com/watch?v=dzItGHyteng
+ * "# = floor(# * _CelLevels) / _CelLevels;" is the only line of code, used twice */

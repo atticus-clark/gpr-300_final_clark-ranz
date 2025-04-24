@@ -30,7 +30,6 @@ void ObjectRenderer::ShadowPass(Object* objs, const int& NUM_OBJS) {
 	// reset viewport //
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, *pWidth, *pHeight);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void ObjectRenderer::RegularPass(Object* objs, const int& NUM_OBJS) {
@@ -88,7 +87,7 @@ void ObjectRenderer::OutlinePass(Object* objs, const int& NUM_OBJS) {
 
 	 // setup //
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // don't draw any fragments that were drawn before
-	// aka, only draw the scaled-up parts of the objects
+										 // aka, only draw the scaled-up parts of the objects
 	glStencilMask(0x00); // disable writing to stencil buffer
 
 	// this is what actually determines if outlines are visible through walls or not
