@@ -40,5 +40,5 @@ void main()
 
 	FragColor = mix(reflectColor, refractColor, 0.5);
 	// make it more blue
-	FragColor = mix(FragColor, vec4(0.0, 0.3, 0.5, 1.0), 0.2);
+	FragColor = mix(FragColor, vec4(0.0, 0.3, 1.0, 1.0), 0.4);
 }

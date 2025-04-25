@@ -37,6 +37,8 @@ const int REFRACTION_WIDTH = 640;
 
 const float WAVE_SPEED = 0.03f;
 
+GLuint reflectionTex, refractionTex;
+
 float moveFactor = 0;
 
 ew::Camera camera;
@@ -208,6 +210,14 @@ void drawUI(float dt) {
 	}
 
 	ImGui::End(); // end window: Settings
+
+	ImGui::Begin("reflection");
+	ImGui::Image((void*)reflectionTex, ImVec2(REFLECTION_WIDTH, REFLECTION_HEIGHT));
+	ImGui::End();
+
+	ImGui::Begin("refraction");
+	ImGui::Image((void*)refractionTex, ImVec2(REFRACTION_WIDTH, REFRACTION_HEIGHT));
+	ImGui::End();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

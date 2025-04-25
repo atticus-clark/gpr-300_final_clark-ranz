@@ -61,7 +61,7 @@ int main()
 	glGenFramebuffers(1, &refractionFramebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	GLuint refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	/*GLuint*/ refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
 	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionDepthTex, 0);
@@ -72,7 +72,7 @@ int main()
 	glGenFramebuffers(1, &reflectionFramebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	GLuint reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	/*GLuint*/ reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex , 0);
 	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
@@ -111,11 +111,6 @@ int main()
 	glBindTextureUnit(6, aObjs[2].texture);
 
 	// shader calls //
-	waterShader.use();
-	waterShader.setInt("reflectionTex", 0);
-	waterShader.setInt("refractionTex", 1);
-	waterShader.setInt("dudvMap", 2);
-
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", cubemapTexture);
 
@@ -127,7 +122,6 @@ int main()
 		prevFrameTime = time;
 
 		cameraController.move(window, &camera, deltaTime);
-		float distance = 2 * (camera.position.y - waterHeight);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
 
 		moveFactor += WAVE_SPEED * deltaTime;
@@ -144,36 +138,42 @@ int main()
 
 		// shader calls
 		waterShader.use();
+		waterShader.setInt("dudvMap", dudvMap);
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setFloat("moveFactor", moveFactor);
 
 		// reflection
-		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
-		camera.position.y -= distance;
-		cameraController.pitch = -cameraController.pitch;
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", reflectionClipPlane);
+		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		camera.position.y = -camera.position.y;
+		cameraController.pitch = -cameraController.pitch;
+		
+		waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
-		waterMesh.draw();
-
-		camera.position.y += distance;
+		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 
 		// refraction
-		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", refractionClipPlane);
+		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
-		waterMesh.draw();
-
+		// scene
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
+		waterShader.use();
+		waterShader.setInt("reflectionTex", reflectionTex);
+		waterShader.setInt("refractionTex", refractionTex);
 		waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
