@@ -73,7 +73,7 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	/*GLuint*/ reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex , 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex, 0);
 	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
 	unbindFramebuffer();
@@ -129,10 +129,10 @@ int main()
 		cameraController.move(window, &camera, deltaTime);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
 
-		glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		//glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 
-		// light space transformation matrix
-		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		//// light space transformation matrix
+		//glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		moveFactor += WAVE_SPEED * deltaTime;
 		if (moveFactor >= 1) { moveFactor = 0; }
