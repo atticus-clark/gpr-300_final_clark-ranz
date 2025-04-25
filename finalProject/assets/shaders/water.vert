@@ -13,7 +13,7 @@ uniform mat4 _Model;
 uniform mat4 _ViewProjection;
 uniform mat4 lightSpaceMatrix;
 
-uniform vec4 _Plane;
+//uniform vec4 _Plane;
 
 const float tiling = 6.0;
 
@@ -29,6 +29,6 @@ void main()
 
 	//FragPosLightSpace = lightSpaceMatrix * vec4(vec3(_Model * vec4(vPos, 1.0)), 1.0);
 
-	gl_ClipDistance[0] = dot(worldPos, _Plane);
+	//gl_ClipDistance[0] = dot(worldPos, _Plane);
 	gl_Position = ClipSpace;
 }

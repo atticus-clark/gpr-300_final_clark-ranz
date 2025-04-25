@@ -134,8 +134,8 @@ int main()
 		//// light space transformation matrix
 		//glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-		moveFactor += WAVE_SPEED * deltaTime;
-		if (moveFactor >= 1) { moveFactor = 0; }
+		//moveFactor += WAVE_SPEED * deltaTime;
+		//if (moveFactor >= 1) { moveFactor = 0; }
 
 		// RENDER //
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
@@ -147,12 +147,12 @@ int main()
 		glEnable(GL_CLIP_DISTANCE0);
 
 		// shader calls
-		waterShader.use();
-		waterShader.setFloat("moveFactor", moveFactor);
+		//waterShader.use();
+		//waterShader.setFloat("moveFactor", moveFactor);
 
 		// reflection
-		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		waterShader.setVec4("_Plane", reflectionClipPlane);
+		//waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		//waterShader.setVec4("_Plane", reflectionClipPlane);
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		camera.position.y = -camera.position.y;
@@ -186,8 +186,8 @@ int main()
 		cameraController.pitch = -cameraController.pitch;
 
 		// refraction
-		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		waterShader.setVec4("_Plane", refractionClipPlane);
+		//waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		//waterShader.setVec4("_Plane", refractionClipPlane);
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//waterMesh.draw();
@@ -219,8 +219,9 @@ int main()
 		unbindFramebuffer();
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
-		waterShader.setInt("reflectionTex", reflectionTex);
-		waterShader.setInt("refractionTex", refractionTex);
+		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setInt("reflectionTex", 0);
+		waterShader.setInt("refractionTex", 1);
 		waterMesh.draw();
 		
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
