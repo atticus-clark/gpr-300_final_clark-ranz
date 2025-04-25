@@ -18,6 +18,7 @@ const float waveStrength = 0.02;
 
 void main()
 {
+	// projective texture mapping
 	vec2 ndc = (ClipSpace.xy / ClipSpace.w) / 2.0 + 0.5;
 	vec2 refractTexCoords = ndc;
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);

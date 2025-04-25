@@ -62,7 +62,9 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	GLuint refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
 	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionDepthTex, 0);
 	unbindFramebuffer();
 
 	// reflection framebuffer
@@ -71,7 +73,9 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	GLuint reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex , 0);
 	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
 	unbindFramebuffer();
 
 	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
@@ -135,6 +139,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		glStencilMask(0x00); // disable stencil buffer writing for non-outlined objects
+
 		glEnable(GL_CLIP_DISTANCE0);
 
 		// shader calls
@@ -148,6 +153,10 @@ int main()
 		cameraController.pitch = -cameraController.pitch;
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", reflectionClipPlane);
+
+		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
+
 		waterMesh.draw();
 
 		camera.position.y += distance;
@@ -157,11 +166,18 @@ int main()
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec4("_Plane", refractionClipPlane);
+
+		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
+
 		waterMesh.draw();
 
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
 		waterMesh.draw();
+
+		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
 		// skybox
 		glDepthFunc(GL_LEQUAL); // depth
@@ -174,9 +190,6 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS); // depth
-
-		for(int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
-		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
 		drawUI(deltaTime);
 
