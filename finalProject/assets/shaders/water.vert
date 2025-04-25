@@ -2,6 +2,7 @@
 
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec3 vNormal;
+layout(location = 2) in vec2 vTexCoord;
 
 out vec4 ClipSpace;
 out vec2 TexCoords;
@@ -22,9 +23,9 @@ void main()
 
 	ClipSpace = _ViewProjection * _Model * vec4(vPos, 1.0);
 
-	TexCoords = vec2(vPos.x / 2.0 + 0.5, vPos.y / 2.0 + 0.5) * tiling;
+	TexCoords = vTexCoord;//vec2(vPos.x / 2.0 + 0.5, vPos.y / 2.0 + 0.5) * tiling;
 
-	WorldNormal = vNormal;
+	WorldNormal = transpose(inverse(mat3(_Model))) * vNormal;
 
 	//FragPosLightSpace = lightSpaceMatrix * vec4(vec3(_Model * vec4(vPos, 1.0)), 1.0);
 

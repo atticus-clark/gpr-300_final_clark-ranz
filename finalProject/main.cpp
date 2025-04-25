@@ -161,6 +161,9 @@ int main()
 		//waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		mainShader.use();
+		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		mainShader.setVec4("_Plane", reflectionClipPlane);
 		for (int i = 0; i < NUM_OBJS; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
@@ -190,6 +193,9 @@ int main()
 		//waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		mainShader.use();
+		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		mainShader.setVec4("_Plane", refractionClipPlane);
 		for (int i = 0; i < NUM_OBJS; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
@@ -213,8 +219,10 @@ int main()
 		unbindFramebuffer();
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
+		waterShader.setInt("reflectionTex", reflectionTex);
+		waterShader.setInt("refractionTex", refractionTex);
 		waterMesh.draw();
-
+		
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
 
