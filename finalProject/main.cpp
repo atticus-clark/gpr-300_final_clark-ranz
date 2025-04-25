@@ -63,8 +63,8 @@ int main()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	/*GLuint*/ refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
-	//GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionDepthTex, 0);
+	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, refractionDepthTex, 0);
 	unbindFramebuffer();
 
 	// reflection framebuffer
@@ -74,8 +74,8 @@ int main()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	/*GLuint*/ reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex , 0);
-	//GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
+	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
 	unbindFramebuffer();
 
 	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
@@ -111,6 +111,11 @@ int main()
 	glBindTextureUnit(6, aObjs[2].texture);
 
 	// shader calls //
+	waterShader.use();
+	waterShader.setInt("reflectionTex", 0);
+	waterShader.setInt("refractionTex", 1);
+	waterShader.setInt("dudvMap", 2);
+
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", cubemapTexture);
 
@@ -123,6 +128,11 @@ int main()
 
 		cameraController.move(window, &camera, deltaTime);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
+
+		glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+
+		// light space transformation matrix
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		moveFactor += WAVE_SPEED * deltaTime;
 		if (moveFactor >= 1) { moveFactor = 0; }
@@ -138,7 +148,6 @@ int main()
 
 		// shader calls
 		waterShader.use();
-		waterShader.setInt("dudvMap", dudvMap);
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setFloat("moveFactor", moveFactor);
 
@@ -204,8 +213,6 @@ int main()
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
 		waterShader.use();
-		waterShader.setInt("reflectionTex", reflectionTex);
-		waterShader.setInt("refractionTex", refractionTex);
 		waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }

@@ -23,13 +23,13 @@ void main()
 	vec2 refractTexCoords = ndc;
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
-	vec2 distortion1 = (texture(dudvMap, vec2(TexCoords.x + moveFactor, TexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
-	vec2 distortion2 = (texture(dudvMap, vec2(TexCoords.x, TexCoords.y + moveFactor)).rg * 2.0 - 1.0) * waveStrength;
-
-	vec2 distortion = distortion1 + distortion2;
-
-	refractTexCoords += distortion;
-	reflectTexCoords += distortion;
+//	vec2 distortion1 = (texture(dudvMap, vec2(TexCoords.x + moveFactor, TexCoords.y)).rg * 2.0 - 1.0) * waveStrength;
+//	vec2 distortion2 = (texture(dudvMap, vec2(TexCoords.x, TexCoords.y + moveFactor)).rg * 2.0 - 1.0) * waveStrength;
+//
+//	vec2 distortion = distortion1 + distortion2;
+//
+//	refractTexCoords += distortion;
+//	reflectTexCoords += distortion;
 
 	refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
 	reflectTexCoords.x = clamp(reflectTexCoords.x, 0.001, 0.999);

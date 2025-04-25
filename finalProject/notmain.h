@@ -50,6 +50,10 @@ const int NUM_OBJS = 3;
 Object* aObjs;
 ObjectRenderer objRend = ObjectRenderer();
 
+// orthographic projection light source
+float nearPlane = 5.0f, farPlane = -2.0f;
+glm::mat4 lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
+
 float skyboxVertices[] = {
 	// positions          
 	-10.0f,  10.0f, -10.0f,
