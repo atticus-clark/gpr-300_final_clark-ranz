@@ -127,7 +127,7 @@ int main()
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
 
 		moveFactor += WAVE_SPEED * deltaTime;
-		//moveFactor %= 1;
+		if (moveFactor >= 1) { moveFactor = 0; }
 
 		// RENDER //
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
