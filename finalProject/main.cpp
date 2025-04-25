@@ -63,8 +63,8 @@ int main()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	/*GLuint*/ refractionTex = createTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
-	GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionDepthTex, 0);
+	//GLuint refractionDepthTex = createDepthTexture(REFRACTION_HEIGHT, REFRACTION_WIDTH);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionDepthTex, 0);
 	unbindFramebuffer();
 
 	// reflection framebuffer
@@ -74,8 +74,8 @@ int main()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	/*GLuint*/ reflectionTex = createTexture(REFLECTION_HEIGHT, REFLECTION_WIDTH);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex , 0);
-	GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
+	//GLuint reflectionDepthBuf = createDepthBuffer(REFLECTION_HEIGHT, REFLECTION_WIDTH);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionDepthBuf);
 	unbindFramebuffer();
 
 	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
@@ -150,10 +150,26 @@ int main()
 		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 		
-		waterMesh.draw();
+		//waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
-		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
+		for (int i = 0; i < NUM_OBJS; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
+
+			mainShader.setInt("_DiffuseTexture", i);
+
+			mainShader.setFloat("_Material.Ka", aObjs[i].material.Ka);
+			mainShader.setFloat("_Material.Kd", aObjs[i].material.Kd);
+			mainShader.setFloat("_Material.Ks", aObjs[i].material.Ks);
+			mainShader.setFloat("_Material.Shininess", aObjs[i].material.Shininess);
+
+			mainShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+			// check if object has model or mesh
+			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+			else { aObjs[i].mesh.draw(); }
+		}
 
 		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
@@ -163,10 +179,26 @@ int main()
 		waterShader.setVec4("_Plane", refractionClipPlane);
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		waterMesh.draw();
+		//waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
-		objRend.Render(aObjs, NUM_OBJS); // render outlined objects
+		for (int i = 0; i < NUM_OBJS; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
+
+			mainShader.setInt("_DiffuseTexture", i);
+
+			mainShader.setFloat("_Material.Ka", aObjs[i].material.Ka);
+			mainShader.setFloat("_Material.Kd", aObjs[i].material.Kd);
+			mainShader.setFloat("_Material.Ks", aObjs[i].material.Ks);
+			mainShader.setFloat("_Material.Shininess", aObjs[i].material.Shininess);
+
+			mainShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+			// check if object has model or mesh
+			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+			else { aObjs[i].mesh.draw(); }
+		}
 
 		// scene
 		glDisable(GL_CLIP_DISTANCE0);
