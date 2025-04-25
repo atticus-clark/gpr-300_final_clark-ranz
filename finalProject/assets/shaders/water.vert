@@ -6,7 +6,7 @@ layout(location = 1) in vec3 vNormal;
 out vec4 ClipSpace;
 out vec2 TexCoords;
 out vec3 WorldNormal;
-out vec4 FragPosLightSpace;
+//out vec4 FragPosLightSpace;
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
@@ -26,7 +26,7 @@ void main()
 
 	WorldNormal = vNormal;
 
-	FragPosLightSpace = lightSpaceMatrix * vec4(vec3(_Model * vec4(vPos, 1.0)), 1.0);
+	//FragPosLightSpace = lightSpaceMatrix * vec4(vec3(_Model * vec4(vPos, 1.0)), 1.0);
 
 	gl_ClipDistance[0] = dot(worldPos, _Plane);
 	gl_Position = ClipSpace;

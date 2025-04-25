@@ -148,7 +148,6 @@ int main()
 
 		// shader calls
 		waterShader.use();
-		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setFloat("moveFactor", moveFactor);
 
 		// reflection
@@ -213,6 +212,7 @@ int main()
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
 		waterShader.use();
+		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterMesh.draw();
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
