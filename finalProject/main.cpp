@@ -24,7 +24,7 @@ int main()
 	camera.fov = 60.0f;
 
 	// objects //
-	ew::Mesh waterMesh(ew::createPlane(32.0f, 18.0f, 50));
+	ew::Mesh waterMesh(ew::createPlane(20.0f, 20.0f, 40));
 	ew::Transform waterTransform;
 	int waterHeight = -2;
 	waterTransform.position = glm::vec3(0, waterHeight, 0);
