@@ -37,8 +37,6 @@ const int REFRACTION_WIDTH = 640;
 
 const float WAVE_SPEED = 0.03f;
 
-GLuint reflectionTex, refractionTex;
-
 float moveFactor = 0;
 
 ew::Camera camera;
@@ -49,10 +47,6 @@ Light light;
 const int NUM_OBJS = 3;
 Object* aObjs;
 ObjectRenderer objRend = ObjectRenderer();
-
-// orthographic projection light source
-float nearPlane = 5.0f, farPlane = -2.0f;
-glm::mat4 lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
 
 float waterTiling = 4.0;
 
@@ -101,6 +95,9 @@ float skyboxVertices[] = {
 	 10.0f, -10.0f,  10.0f
 };
 
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
 // creates a color buffer texture for a framebuffer- mandatory
 GLuint createTexture(int height, int width)
 {
@@ -112,6 +109,9 @@ GLuint createTexture(int height, int width)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	return texture;
 }
+
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
 
 // creates a depth buffer texture for a framebuffer- optional
 GLuint createDepthTexture(int height, int width)
@@ -125,6 +125,9 @@ GLuint createDepthTexture(int height, int width)
 	return texture;
 }
 
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
 // creates a depth buffer attachment
 GLuint createDepthBuffer(int height, int width)
 {
@@ -134,12 +137,18 @@ GLuint createDepthBuffer(int height, int width)
 	return depthBuffer;
 }
 
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
 void bindFramebuffer(GLuint framebuffer, int height, int width)
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	glViewport(0, 0, width, height);
 }
+
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
 
 void unbindFramebuffer()
 {

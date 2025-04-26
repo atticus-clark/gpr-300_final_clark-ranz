@@ -21,9 +21,9 @@ uniform float _Tiling;
 
 void main()
 {
-	vec4 worldPos = _Model * vec4(vPos, 1.0);
+	vec4 worldPos = _Model * vec4(vPos, 1.0); // world space
 
-	ClipSpace = _ViewProjection * worldPos;
+	ClipSpace = _ViewProjection * worldPos; // homogenous clip space
 
 	TexCoords = vTexCoord * _Tiling;
 

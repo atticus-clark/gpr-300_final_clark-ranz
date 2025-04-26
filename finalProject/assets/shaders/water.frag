@@ -16,7 +16,7 @@ uniform sampler2D dudvMap;
 uniform sampler2D normalMap;
 
 uniform vec4 _LightColor;
-uniform vec3 _LightDirection = vec3(0.0, -1.0, 0.0);
+uniform vec3 _LightDirection;
 
 uniform vec3 _View;
 
@@ -30,11 +30,11 @@ void main()
 {
 	// projective texture mapping
 	vec2 ndc = (ClipSpace.xy / ClipSpace.w) / 2.0 + 0.5;
-	vec2 refractTexCoords = ndc;
+	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
-	vec2 distortedTexCoords = texture(dudvMap, vec2(TexCoords.x + moveFactor, TexCoords.y)).rg*0.1;
-	distortedTexCoords = TexCoords + vec2(distortedTexCoords.x, distortedTexCoords.y+moveFactor);
+	vec2 distortedTexCoords = texture(dudvMap, vec2(TexCoords.x + moveFactor, TexCoords.y)).rg * 0.1;
+	distortedTexCoords = TexCoords + vec2(distortedTexCoords.x, distortedTexCoords.y + moveFactor);
 	vec2 totalDistortion = (texture(dudvMap, distortedTexCoords).rg * 2.0 - 1.0) * waveStrength;
 
 	refractTexCoords += totalDistortion;
@@ -62,5 +62,5 @@ void main()
 
 	FragColor = mix(reflectColor, refractColor, refractiveFactor);
 	// make it more blue
-	FragColor = mix(FragColor, vec4(0.0, 0.1, 0.3, 1.0), 0.1 + vec4(specularHighlights, 0.0));
+	FragColor = mix(FragColor, vec4(0.0, 0.1, 0.3, 1.0), 0.4 + vec4(specularHighlights, 0.0));
 }
