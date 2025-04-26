@@ -255,7 +255,7 @@ void drawUI(float dt) {
 		}
 	}
 
-	ImGui::Checkbox("Xray", &(objRend.xray));
+	// ImGui::Checkbox("Xray", &(objRend.xray)); // this seems to be breaking things
 	ImGui::ColorEdit3("Outline Color", &(objRend.outlineColor.r));
 	ImGui::DragFloat("Outline Thickness", &(objRend.outlineScale), 0.001f, 0.0f, 0.2f);
 
