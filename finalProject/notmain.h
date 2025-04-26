@@ -333,14 +333,15 @@ void SetupOutlinedObjs() {
 	aObjs[1].model = new ew::Model("assets/models/Suzanne.obj");
 	aObjs[2].model = new ew::Model("assets/models/15211_Wakeboard_v1_NEW.obj");
 
-	aObjs[0].transform.position = glm::vec3(-3.0f, 0.0f, 0.0f);
+	aObjs[0].transform.position = glm::vec3(-3.0f, 2.0f, 0.0f);
 	aObjs[1].transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	aObjs[2].transform.position = glm::vec3(3.0f, 0.0f, 0.0f);
+	aObjs[2].transform.position = glm::vec3(3.0f, -1.7f, 0.0f);
 
 	aObjs[0].texture = ew::loadTexture("assets/textures/redPx.jpg");
 	aObjs[1].texture = ew::loadTexture("assets/textures/redPx.jpg");
 	aObjs[2].texture = ew::loadTexture("assets/textures/redPx.jpg");
 
+	aObjs[1].rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 	aObjs[2].transform.scale = glm::vec3(0.01f, 0.01f, 0.01f);
 	aObjs[2].rotation = glm::vec3(0.0f, 90.0f, 90.0f);
 }
