@@ -142,3 +142,4 @@ void ObjectRenderer::SetupDepthMap() {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+

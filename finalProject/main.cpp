@@ -1,5 +1,9 @@
 #pragma once
 
+// creator credits:
+// water & skybox - River
+// cel shading and object outlines - Atticus
+
 #include "notmain.h"
 
 int main()
@@ -23,6 +27,9 @@ int main()
 	camera.aspectRatio = (float)screenWidth / screenHeight;
 	camera.fov = 60.0f;
 
+	// code adapted for C++ from ThinMatrix's water tutorial
+	// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+	
 	// objects //
 	ew::Mesh waterMesh(ew::createPlane(20.0f, 20.0f, 40));
 	ew::Transform waterTransform;
@@ -32,6 +39,9 @@ int main()
 	glm::vec4 reflectionClipPlane = glm::vec4(0, 1, 0, -waterHeight);
 	glm::vec4 refractionClipPlane = glm::vec4(0, -1, 0, waterHeight);
 
+	// code taken from LearnOpenGL's skybox tutorial
+	// https://learnopengl.com/Advanced-OpenGL/Cubemaps
+	
 	// skybox //
 	// skybox textures
 	std::vector<std::string> faces
@@ -131,10 +141,7 @@ int main()
 
 		cameraController.move(window, &camera, deltaTime);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
-
 		glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-
-		// light space transformation matrix
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		moveFactor += WAVE_SPEED * deltaTime;
@@ -153,60 +160,31 @@ int main()
 		waterShader.use();
 		waterShader.setFloat("moveFactor", moveFactor);
 
-		// reflection
-		//waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		//waterShader.setVec4("_Plane", reflectionClipPlane);
+
+		// reflection //
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 		
-		//waterMesh.draw();
-
 		// skybox
 		glDepthFunc(GL_LEQUAL); // depth
 		skyboxShader.use();
 		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		// skybox cube
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		renderSkybox(skyboxVAO, cubemapTexture);
 		glDepthFunc(GL_LESS); // depth
 
+		// depth pass
 		depthShader.use();
 		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
-		for (int i = 0; i < NUM_OBJS; i++) {
-			depthShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+		depthObjRender(depthShader);
 
-			// check if object has model or mesh
-			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
-			else { aObjs[i].mesh.draw(); }
-		}
-
-		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		// regular pass
 		mainShader.use();
 		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		mainShader.setVec4("_Plane", reflectionClipPlane);
 		mainShader.setVec4("_LightColor", light.color);
-		for (int i = 0; i < NUM_OBJS; i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
-
-			mainShader.setInt("_DiffuseTexture", i);
-
-			mainShader.setFloat("_Material.Ka", aObjs[i].material.Ka);
-			mainShader.setFloat("_Material.Kd", aObjs[i].material.Kd);
-			mainShader.setFloat("_Material.Ks", aObjs[i].material.Ks);
-			mainShader.setFloat("_Material.Shininess", aObjs[i].material.Shininess);
-
-			mainShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
-
-			// check if object has model or mesh
-			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
-			else { aObjs[i].mesh.draw(); }
-		}
+		objRender(mainShader);
 
 		glBindTexture(GL_TEXTURE_2D, reflectionTex);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -215,67 +193,40 @@ int main()
 		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 
-		// refraction
-		//waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		//waterShader.setVec4("_Plane", refractionClipPlane);
+
+		// refraction //
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//waterMesh.draw();
-		// 
+
 		// skybox
 		glDepthFunc(GL_LEQUAL); // depth
 		skyboxShader.use();
 		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		// skybox cube
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		renderSkybox(skyboxVAO, cubemapTexture);
 		glDepthFunc(GL_LESS); // depth
 
+		// depth pass
 		depthShader.use();
 		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
-		for (int i = 0; i < NUM_OBJS; i++) {
-			depthShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+		depthObjRender(depthShader);
 
-			// check if object has model or mesh
-			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
-			else { aObjs[i].mesh.draw(); }
-		}
-
-		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+		// regular pass
 		mainShader.use();
 		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		mainShader.setVec4("_Plane", refractionClipPlane);
 		mainShader.setVec4("_LightColor", light.color);
-		for (int i = 0; i < NUM_OBJS; i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
-
-			mainShader.setInt("_DiffuseTexture", i);
-
-			mainShader.setFloat("_Material.Ka", aObjs[i].material.Ka);
-			mainShader.setFloat("_Material.Kd", aObjs[i].material.Kd);
-			mainShader.setFloat("_Material.Ks", aObjs[i].material.Ks);
-			mainShader.setFloat("_Material.Shininess", aObjs[i].material.Shininess);
-
-			mainShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
-
-			// check if object has model or mesh
-			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
-			else { aObjs[i].mesh.draw(); }
-		}
-
-
+		objRender(mainShader);
 
 		glBindTexture(GL_TEXTURE_2D, refractionTex);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 8);
 
-		// scene
+
+		// scene //
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
+
+		// shader calls
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
@@ -286,6 +237,8 @@ int main()
 		waterShader.setFloat("_Tiling", waterTiling);
 		waterShader.setInt("reflectionTex", 7);
 		waterShader.setInt("refractionTex", 8);
+
+		// draw scene
 		waterMesh.draw();
 		
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
@@ -295,12 +248,7 @@ int main()
 		glDepthFunc(GL_LEQUAL); // depth
 		skyboxShader.use();
 		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		// skybox cube
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
+		renderSkybox(skyboxVAO, cubemapTexture);
 		glDepthFunc(GL_LESS); // depth
 
 		drawUI(deltaTime);

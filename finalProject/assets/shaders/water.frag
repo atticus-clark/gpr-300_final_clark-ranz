@@ -1,5 +1,8 @@
 #version 450
 
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
 in vec4 ClipSpace;
 in vec2 TexCoords;
 in vec3 ToCamera;

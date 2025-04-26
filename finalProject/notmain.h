@@ -147,6 +147,8 @@ void unbindFramebuffer()
 	glViewport(0, 0, screenWidth, screenHeight);
 }
 
+// code adapted from LearnOpenGL's skybox tutorial
+// https://learnopengl.com/Advanced-OpenGL/Cubemaps
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
 	unsigned int textureID;
@@ -173,6 +175,52 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	return textureID;
+}
+
+// code taken from LearnOpenGL's skybox tutorial
+// https://learnopengl.com/Advanced-OpenGL/Cubemaps
+void renderSkybox(unsigned int VAO, GLuint texture)
+{
+	glBindVertexArray(VAO);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+}
+
+// from Atticus' obj render
+void depthObjRender(ew::Shader shader)
+{
+	for (int i = 0; i < NUM_OBJS; i++) {
+		shader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+		// check if object has model or mesh
+		if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+		else { aObjs[i].mesh.draw(); }
+	}
+}
+
+// from Atticus' obj render
+void objRender(ew::Shader shader)
+{
+	for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
+	for (int i = 0; i < NUM_OBJS; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
+
+		shader.setInt("_DiffuseTexture", i);
+
+		shader.setFloat("_Material.Ka", aObjs[i].material.Ka);
+		shader.setFloat("_Material.Kd", aObjs[i].material.Kd);
+		shader.setFloat("_Material.Ks", aObjs[i].material.Ks);
+		shader.setFloat("_Material.Shininess", aObjs[i].material.Shininess);
+
+		shader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+		// check if object has model or mesh
+		if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+		else { aObjs[i].mesh.draw(); }
+	}
 }
 
 void resetCamera(ew::Camera* camera, ew::CameraController* controller)

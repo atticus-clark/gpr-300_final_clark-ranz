@@ -1,5 +1,8 @@
 #version 450
 
+// code adapted for C++ from ThinMatrix's water tutorial
+// https://www.youtube.com/playlist?list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vTexCoord;
