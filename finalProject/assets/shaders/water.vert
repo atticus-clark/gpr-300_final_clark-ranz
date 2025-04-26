@@ -14,7 +14,7 @@ uniform mat4 _ViewProjection;
 uniform vec3 _CameraPos;
 uniform vec3 _LightPos;
 
-const float tiling = 4.0;
+uniform float _Tiling;
 
 void main()
 {
@@ -22,7 +22,7 @@ void main()
 
 	ClipSpace = _ViewProjection * worldPos;
 
-	TexCoords = vTexCoord * tiling;
+	TexCoords = vTexCoord * _Tiling;
 
 	ToCamera = _CameraPos - worldPos.xyz;
 

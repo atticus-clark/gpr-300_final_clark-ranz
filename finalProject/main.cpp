@@ -24,7 +24,7 @@ int main()
 	camera.fov = 60.0f;
 
 	// objects //
-	ew::Mesh waterMesh(ew::createPlane(10.0f, 10.0f, 20));
+	ew::Mesh waterMesh(ew::createPlane(32.0f, 18.0f, 50));
 	ew::Transform waterTransform;
 	int waterHeight = -2;
 	waterTransform.position = glm::vec3(0, waterHeight, 0);
@@ -189,6 +189,7 @@ int main()
 		mainShader.use();
 		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		mainShader.setVec4("_Plane", reflectionClipPlane);
+		mainShader.setVec4("_LightColor", light.color);
 		for (int i = 0; i < NUM_OBJS; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
@@ -247,6 +248,7 @@ int main()
 		mainShader.use();
 		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		mainShader.setVec4("_Plane", refractionClipPlane);
+		mainShader.setVec4("_LightColor", light.color);
 		for (int i = 0; i < NUM_OBJS; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, aObjs[i].texture);
@@ -279,7 +281,9 @@ int main()
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec3("_CameraPos", camera.position);
 		waterShader.setVec3("_LightPos", light.pos);
+		waterShader.setVec4("_LightColor", light.color);
 		waterShader.setVec3("_View", glm::normalize(camera.target - camera.position));
+		waterShader.setFloat("_Tiling", waterTiling);
 		waterShader.setInt("reflectionTex", 7);
 		waterShader.setInt("refractionTex", 8);
 		waterMesh.draw();

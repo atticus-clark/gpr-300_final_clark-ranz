@@ -12,7 +12,7 @@ uniform sampler2D refractionTex;
 uniform sampler2D dudvMap;
 uniform sampler2D normalMap;
 
-uniform vec3 _LightColor = vec3(1.0);
+uniform vec4 _LightColor;
 uniform vec3 _LightDirection = vec3(0.0, -1.0, 0.0);
 
 uniform vec3 _View;
@@ -55,7 +55,7 @@ void main()
 	vec3 reflectedLight = reflect(normalize(ToLight), normal);
 	float specular = max(dot(reflectedLight, _View), 0.0);
 	specular = pow(specular, shineDamper);
-	vec3 specularHighlights = _LightColor * specular * reflectivity;
+	vec3 specularHighlights = _LightColor.rgb * specular * reflectivity;
 
 	FragColor = mix(reflectColor, refractColor, refractiveFactor);
 	// make it more blue

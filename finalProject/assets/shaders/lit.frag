@@ -18,7 +18,7 @@ struct Material {
 uniform Material _Material;
 
 uniform vec3 _AmbientColor = vec3(0.3,0.4,0.46);
-uniform vec4 _LightColor = vec4(1.0);
+uniform vec4 _LightColor;
 uniform vec3 _LightPos;
 uniform vec3 _EyePos;
 

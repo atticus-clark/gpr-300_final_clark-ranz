@@ -54,6 +54,8 @@ ObjectRenderer objRend = ObjectRenderer();
 float nearPlane = 5.0f, farPlane = -2.0f;
 glm::mat4 lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
 
+float waterTiling = 4.0;
+
 float skyboxVertices[] = {
 	// positions          
 	-10.0f,  10.0f, -10.0f,
@@ -194,6 +196,17 @@ void drawUI(float dt) {
 		resetCamera(&camera, &cameraController);
 	}
 
+	if (ImGui::CollapsingHeader("Lighting"))
+	{
+		ImGui::ColorEdit3("Light Color", &light.color.r);
+		if (ImGui::CollapsingHeader("Light Position"))
+		{
+			ImGui::SliderFloat("X", &light.pos.x, -100.0f, 100.0f);
+			ImGui::SliderFloat("Y", &light.pos.y, -100.0f, 100.0f);
+			ImGui::SliderFloat("Z", &light.pos.z, -100.0f, 100.0f);
+		}
+	}
+
 	ImGui::Checkbox("Xray", &(objRend.xray));
 	ImGui::ColorEdit3("Outline Color", &(objRend.outlineColor.r));
 	ImGui::DragFloat("Outline Thickness", &(objRend.outlineScale), 0.001f, 0.0f, 0.2f);
@@ -213,15 +226,12 @@ void drawUI(float dt) {
 		}
 	}
 
+	if (ImGui::CollapsingHeader("Water"))
+	{
+		ImGui::DragFloat("Tiling", &waterTiling, 0.1, 0.1, 20);
+	}
+
 	ImGui::End(); // end window: Settings
-
-	ImGui::Begin("reflection");
-	ImGui::Image((void*)reflectionTex, ImVec2(REFLECTION_WIDTH, REFLECTION_HEIGHT));
-	ImGui::End();
-
-	ImGui::Begin("refraction");
-	ImGui::Image((void*)refractionTex, ImVec2(REFRACTION_WIDTH, REFRACTION_HEIGHT));
-	ImGui::End();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
