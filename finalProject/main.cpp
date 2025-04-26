@@ -79,6 +79,7 @@ int main()
 	unbindFramebuffer();
 
 	GLuint dudvMap = ew::loadTexture("assets/textures/waterDUDV.png");
+	GLuint waterNormal = ew::loadTexture("assets/textures/waterNormalMap.png");
 
 	// shaders //
 	ew::Shader waterShader = ew::Shader("assets/shaders/water.vert", "assets/shaders/water.frag");
@@ -104,6 +105,7 @@ int main()
 	glBindTextureUnit(7, reflectionTex);
 	glBindTextureUnit(8, refractionTex);
 	glBindTextureUnit(9, dudvMap);
+	glBindTextureUnit(10, waterNormal);
 
 	glBindTextureUnit(3, objRend.depthMapTexture);
 	glBindTextureUnit(4, aObjs[0].texture);
@@ -115,6 +117,7 @@ int main()
 	waterShader.setInt("reflectionTex", 7);
 	waterShader.setInt("refractionTex", 8);
 	waterShader.setInt("dudvMap", 9);
+	waterShader.setInt("normalMap", 10);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", cubemapTexture);
@@ -275,6 +278,8 @@ int main()
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		waterShader.setVec3("_CameraPos", camera.position);
+		waterShader.setVec3("_LightPos", light.pos);
+		waterShader.setVec3("_View", glm::normalize(camera.target - camera.position));
 		waterShader.setInt("reflectionTex", 7);
 		waterShader.setInt("refractionTex", 8);
 		waterMesh.draw();

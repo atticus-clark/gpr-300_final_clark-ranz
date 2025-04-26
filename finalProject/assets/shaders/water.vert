@@ -7,10 +7,12 @@ layout(location = 2) in vec2 vTexCoord;
 out vec4 ClipSpace;
 out vec2 TexCoords;
 out vec3 ToCamera;
+out vec3 ToLight;
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
 uniform vec3 _CameraPos;
+uniform vec3 _LightPos;
 
 const float tiling = 4.0;
 
@@ -23,6 +25,8 @@ void main()
 	TexCoords = vTexCoord * tiling;
 
 	ToCamera = _CameraPos - worldPos.xyz;
+
+	ToLight = worldPos.xyz - _LightPos;
 
 	gl_Position = ClipSpace;
 }
