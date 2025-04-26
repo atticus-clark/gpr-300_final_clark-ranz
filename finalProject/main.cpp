@@ -101,9 +101,9 @@ int main()
 	objRend.SetOutlineShaderPtr(&outlineShader);
 
 	// textures //
-	glBindTextureUnit(0, reflectionTex);
-	glBindTextureUnit(1, refractionTex);
-	glBindTextureUnit(2, dudvMap);
+	glBindTextureUnit(7, reflectionTex);
+	glBindTextureUnit(8, refractionTex);
+	glBindTextureUnit(9, dudvMap);
 
 	glBindTextureUnit(3, objRend.depthMapTexture);
 	glBindTextureUnit(4, aObjs[0].texture);
@@ -112,9 +112,9 @@ int main()
 
 	// shader calls //
 	waterShader.use();
-	waterShader.setInt("reflectionTex", 0);
-	waterShader.setInt("refractionTex", 1);
-	waterShader.setInt("dudvMap", 2);
+	waterShader.setInt("reflectionTex", 7);
+	waterShader.setInt("refractionTex", 8);
+	waterShader.setInt("dudvMap", 9);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", cubemapTexture);
@@ -129,10 +129,10 @@ int main()
 		cameraController.move(window, &camera, deltaTime);
 		glm::mat4 viewProj = camera.projectionMatrix() * camera.viewMatrix();
 
-		//glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 lightView = glm::lookAt(light.pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 
-		//// light space transformation matrix
-		//glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		// light space transformation matrix
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		//moveFactor += WAVE_SPEED * deltaTime;
 		//if (moveFactor >= 1) { moveFactor = 0; }
@@ -159,6 +159,15 @@ int main()
 		cameraController.pitch = -cameraController.pitch;
 		
 		//waterMesh.draw();
+		depthShader.use();
+		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
+		for (int i = 0; i < NUM_OBJS; i++) {
+			depthShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+			// check if object has model or mesh
+			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+			else { aObjs[i].mesh.draw(); }
+		}
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		mainShader.use();
@@ -181,6 +190,9 @@ int main()
 			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
 			else { aObjs[i].mesh.draw(); }
 		}
+		glBindTexture(GL_TEXTURE_2D, reflectionTex);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 7);
 
 		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
@@ -191,6 +203,16 @@ int main()
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//waterMesh.draw();
+
+		depthShader.use();
+		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
+		for (int i = 0; i < NUM_OBJS; i++) {
+			depthShader.setMat4("_Model", aObjs[i].transform.modelMatrix());
+
+			// check if object has model or mesh
+			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
+			else { aObjs[i].mesh.draw(); }
+		}
 
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
 		mainShader.use();
@@ -214,14 +236,18 @@ int main()
 			else { aObjs[i].mesh.draw(); }
 		}
 
+		glBindTexture(GL_TEXTURE_2D, refractionTex);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 8);
+
 		// scene
 		glDisable(GL_CLIP_DISTANCE0);
 		unbindFramebuffer();
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
-		waterShader.setInt("reflectionTex", 0);
-		waterShader.setInt("refractionTex", 1);
+		waterShader.setInt("reflectionTex", 7);
+		waterShader.setInt("refractionTex", 8);
 		waterMesh.draw();
 		
 		for (int i = 0; i < NUM_OBJS; i++) { aObjs[i].UpdateRotation(); }
