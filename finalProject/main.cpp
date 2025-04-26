@@ -134,8 +134,8 @@ int main()
 		// light space transformation matrix
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-		//moveFactor += WAVE_SPEED * deltaTime;
-		//if (moveFactor >= 1) { moveFactor = 0; }
+		moveFactor += WAVE_SPEED * deltaTime;
+		if (moveFactor >= 1) { moveFactor = 0; }
 
 		// RENDER //
 		glClearColor(0.6f, 0.8f, 0.92f, 1.0f);
@@ -147,8 +147,8 @@ int main()
 		glEnable(GL_CLIP_DISTANCE0);
 
 		// shader calls
-		//waterShader.use();
-		//waterShader.setFloat("moveFactor", moveFactor);
+		waterShader.use();
+		waterShader.setFloat("moveFactor", moveFactor);
 
 		// reflection
 		//waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
@@ -159,6 +159,19 @@ int main()
 		cameraController.pitch = -cameraController.pitch;
 		
 		//waterMesh.draw();
+
+		// skybox
+		glDepthFunc(GL_LEQUAL); // depth
+		skyboxShader.use();
+		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		// skybox cube
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS); // depth
+
 		depthShader.use();
 		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
 		for (int i = 0; i < NUM_OBJS; i++) {
@@ -190,6 +203,7 @@ int main()
 			if (aObjs[i].model != nullptr) { aObjs[i].model->draw(); }
 			else { aObjs[i].mesh.draw(); }
 		}
+
 		glBindTexture(GL_TEXTURE_2D, reflectionTex);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 7);
@@ -203,6 +217,18 @@ int main()
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//waterMesh.draw();
+		// 
+		// skybox
+		glDepthFunc(GL_LEQUAL); // depth
+		skyboxShader.use();
+		skyboxShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		// skybox cube
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS); // depth
 
 		depthShader.use();
 		depthShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
@@ -236,6 +262,8 @@ int main()
 			else { aObjs[i].mesh.draw(); }
 		}
 
+
+
 		glBindTexture(GL_TEXTURE_2D, refractionTex);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 8);
@@ -246,6 +274,7 @@ int main()
 		waterShader.use();
 		waterShader.setMat4("_Model", waterTransform.modelMatrix());
 		waterShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
+		waterShader.setVec3("_CameraPos", camera.position);
 		waterShader.setInt("reflectionTex", 7);
 		waterShader.setInt("refractionTex", 8);
 		waterMesh.draw();

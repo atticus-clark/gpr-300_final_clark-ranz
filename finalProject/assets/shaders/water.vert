@@ -6,29 +6,23 @@ layout(location = 2) in vec2 vTexCoord;
 
 out vec4 ClipSpace;
 out vec2 TexCoords;
-out vec3 WorldNormal;
-//out vec4 FragPosLightSpace;
+out vec3 ToCamera;
 
 uniform mat4 _Model;
 uniform mat4 _ViewProjection;
-uniform mat4 lightSpaceMatrix;
+uniform vec3 _CameraPos;
 
-//uniform vec4 _Plane;
-
-const float tiling = 6.0;
+const float tiling = 4.0;
 
 void main()
 {
 	vec4 worldPos = _Model * vec4(vPos, 1.0);
 
-	ClipSpace = _ViewProjection * _Model * vec4(vPos, 1.0);
+	ClipSpace = _ViewProjection * worldPos;
 
-	TexCoords = vTexCoord;//vec2(vPos.x / 2.0 + 0.5, vPos.y / 2.0 + 0.5) * tiling;
+	TexCoords = vTexCoord * tiling;
 
-	WorldNormal = transpose(inverse(mat3(_Model))) * vNormal;
+	ToCamera = _CameraPos - worldPos.xyz;
 
-	//FragPosLightSpace = lightSpaceMatrix * vec4(vec3(_Model * vec4(vPos, 1.0)), 1.0);
-
-	//gl_ClipDistance[0] = dot(worldPos, _Plane);
 	gl_Position = ClipSpace;
 }
