@@ -165,7 +165,7 @@ int main()
 		// reflection //
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		camera.position.y -= distance;
+		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 		
 		// skybox
@@ -185,13 +185,14 @@ int main()
 		mainShader.setMat4("_ViewProjection", camera.projectionMatrix() * camera.viewMatrix());
 		mainShader.setVec4("_Plane", reflectionClipPlane);
 		mainShader.setVec4("_LightColor", light.color);
+		mainShader.setMat4("_LightSpaceMatrix", lightSpaceMatrix);
 		objRender(mainShader);
 
 		glBindTexture(GL_TEXTURE_2D, reflectionTex);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 7);
 
-		camera.position.y += distance;
+		camera.position.y = -camera.position.y;
 		cameraController.pitch = -cameraController.pitch;
 
 		// refraction //
