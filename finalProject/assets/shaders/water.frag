@@ -16,7 +16,6 @@ uniform sampler2D dudvMap;
 uniform sampler2D normalMap;
 
 uniform vec4 _LightColor;
-uniform vec3 _LightDirection;
 
 uniform vec3 _View;
 

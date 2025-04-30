@@ -157,6 +157,9 @@ int main()
 
 		glEnable(GL_CLIP_DISTANCE0);
 
+		float camAbove = 2 * (camera.position.y - waterHeight);
+		float targetAbove = 2 * (camera.target.y - waterHeight);
+
 		// shader calls
 		waterShader.use();
 		waterShader.setFloat("moveFactor", moveFactor);
@@ -165,8 +168,8 @@ int main()
 		// reflection //
 		bindFramebuffer(reflectionFramebuffer, REFLECTION_HEIGHT, REFLECTION_WIDTH);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		camera.position.y = -camera.position.y;
-		cameraController.pitch = -cameraController.pitch;
+		camera.position.y -= camAbove;
+		camera.target.y -= targetAbove;
 		
 		// skybox
 		glDepthFunc(GL_LEQUAL); // depth
@@ -192,8 +195,8 @@ int main()
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 7);
 
-		camera.position.y = -camera.position.y;
-		cameraController.pitch = -cameraController.pitch;
+		camera.position.y += camAbove;
+		camera.target.y += targetAbove;
 
 		// refraction //
 		bindFramebuffer(refractionFramebuffer, REFRACTION_HEIGHT, REFRACTION_WIDTH);
@@ -238,6 +241,8 @@ int main()
 		waterShader.setFloat("_Tiling", waterTiling);
 		waterShader.setInt("reflectionTex", 7);
 		waterShader.setInt("refractionTex", 8);
+		waterShader.setInt("dudvMap", 9);
+		waterShader.setInt("normalMap", 10);
 
 		// draw scene
 		waterMesh.draw();
